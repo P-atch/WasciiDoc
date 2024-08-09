@@ -1,0 +1,26 @@
+<ng-template #documentRestriction>
+    <button  mat-stroked-button [matMenuTriggerFor]="aboveMenu">{{ possiblePerms.get(documentService.documentInfos.restriction) }}</button>
+    <mat-menu #aboveMenu="matMenu" yPosition="above">
+
+      <button (click)="changePermission(4)" mat-menu-item matTooltipPosition="right" matTooltip="Public read and edit">
+          <mat-icon>edit</mat-icon>
+          <span>Editable</span>
+      </button>
+        <button (click)="changePermission(3)" mat-menu-item matTooltipPosition="right" matTooltip="No public edit">
+          <mat-icon>perm_identity</mat-icon>
+          <span>Limited</span>
+      </button>
+        <button (click)="changePermission(2)" mat-menu-item matTooltipPosition="right" matTooltip="Only proprietary can edit">
+          <mat-icon>lock</mat-icon>
+          <span>Locked</span>
+      </button>
+        <button (click)="changePermission(1)" mat-menu-item matTooltipPosition="right" matTooltip="Only proprietary can edit (no public read access)">
+          <mat-icon>beach_access</mat-icon>
+          <span>Protected</span>
+      </button>
+        <button (click)="changePermission(0)" mat-menu-item matTooltipPosition="right" matTooltip="Only proprietary can access and edit">
+          <mat-icon>pan_tool</mat-icon>
+          <span>Private</span>
+      </button>
+    </mat-menu>
+</ng-template>

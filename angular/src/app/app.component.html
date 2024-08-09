@@ -1,0 +1,113 @@
+<mat-progress-bar *ngIf="this.loaderIndex" style="position: fixed; top:0;z-index: 10000;" mode="query"></mat-progress-bar>
+<mat-toolbar id="main_toolbar">
+    <img (click)="navigateToMainPage()" style="cursor: pointer" ngSrc="/icon_256.png" alt="Icon" width="50" height="50"/>
+    <span class="mini-spacer"></span>
+    <span (click)="navigateToMainPage()" style="cursor: pointer">WasciiDoc</span>
+    <span class="little-spacer"></span>
+    <div *ngFor="let element of toolbarElementsLeft">
+        <ng-container *ngTemplateOutlet="element"></ng-container>
+    </div>
+    <span class="spacer"></span>
+    <div *ngFor="let element of toolbarElementsRight">
+        <ng-container *ngTemplateOutlet="element"></ng-container>
+        <span class="mini-spacer"></span>
+    </div>
+
+    <span class="little-spacer" ></span>
+    <button mat-fab extended (click)="displayAuthentCard()" *ngIf="this.auth.userInfos == null" style="height: 45px;">
+      Connect
+    </button>
+    <div  style="display: flex;align-items: center;justify-content: center;">
+        <span *ngIf="this.auth.userInfos != null" style="margin-right: 10px;">{{this.auth.userInfos.username}}</span>
+
+
+        <img alt="Profile image" ngSrc="{{this.auth.userInfos?.profile_image_url}}" *ngIf="this.auth.userInfos?.profile_image_url != null"
+             height="35" width="35" style="border-radius: 20px; margin-right: 10px"/>
+
+        <a href="/logout">
+            <button mat-fab extended *ngIf="this.auth.userInfos != null">
+                Logout
+            </button>
+        </a>
+
+    </div>
+    <span class="little-spacer"></span>
+    <!--<mat-button-toggle-group style="visibility: hidden" id="editorSwitcher"
+      [hideSingleSelectionIndicator]="true" >
+      <mat-button-toggle value="edit"><mat-icon aria-hidden="false" aria-label="Edit view" fontIcon="edit"></mat-icon></mat-button-toggle>
+      <mat-button-toggle value="splitted"><mat-icon aria-hidden="false" aria-label="Splitted view" fontIcon="vertical_split"></mat-icon></mat-button-toggle>
+      <mat-button-toggle value="view"><mat-icon aria-hidden="false" aria-label="Read view" fontIcon="format_align_center"></mat-icon></mat-button-toggle>
+    </mat-button-toggle-group>-->
+    <button mat-mini-fab aria-label="Toggle dark mode" (click)="toggleTheme()" id="theme_button">
+      <mat-icon>dark_mode</mat-icon>
+    </button>
+</mat-toolbar>
+
+
+<!--<app-editor style="bottom: 0;position: relative;width: 100%;"></app-editor>-->
+<router-outlet />
+
+<!--<ng-template #connectButtonTemplate>
+    <button mat-fab extended (click)="displayAuthentCard()" *ngIf="this.auth.userInfos == null">
+      Connect
+    </button>
+    <div style="width: 100%; align-content: center;">
+        <span *ngIf="this.auth.userInfos != null" style="margin-right: 10px;">{{this.auth.userInfos.username}}</span>
+        <span class="mini-spacer"></span>
+        <img alt="Profile image" ngSrc="{{this.auth.userInfos?.profile_image_url}}" *ngIf="this.auth.userInfos?.profile_image_url != null"
+             height="35" width="35" style="border-radius: 20px; margin-right: 10px"/>
+        <span class="mini-spacer"></span>
+        <a href="/logout">
+            <button mat-fab extended (click)="displayAuthentCard()" *ngIf="this.auth.userInfos != null">
+                Logout
+            </button>
+        </a>
+        <span class="mini-spacer"></span>
+    </div>
+
+</ng-template>-->
+
+<div class="connect-card-container" #connectCardContainer>
+    <mat-card class="connect-card" appearance="outlined" [@slideInFromBottom]="cardState">
+        <mat-card-header>
+            <mat-card-title>Authentication</mat-card-title>
+        </mat-card-header>
+        <mat-card-content style="display: flex;flex-direction: column;">
+            <!--<button mat-fab id="github_oauth_btn" class="oauth-button" style="display: flex">-->
+            <a href="/auth/github/login" style="text-decoration: none" *ngIf="this.auth.authMethods.indexOf('github') != -1">
+                <div id="github_oauth_btn" class="oauth-button">
+                    <div class="oauth-button-l1">
+                        <div class="oauth-provider-icon-container">
+                            <img ngSrc="github-mark-white.png" alt="" class="oauth-provider-icon" [width]="40" [height]="40"/>
+                        </div>
+                    </div>
+                    <div class="button-splitter"></div>
+                    <div class="oauth-button-l1">
+                        <div>
+                        Sign in with Github
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/auth/gitlab/login" style="text-decoration: none" *ngIf="this.auth.authMethods.indexOf('gitlab') != -1">
+                <div id="gitlab_oauth_btn" class="oauth-button">
+                    <div class="oauth-button-l1">
+                        <div class="oauth-provider-icon-container">
+                            <img ngSrc="gitlab-logo-500.png" alt="" class="oauth-provider-icon" [width]="40" [height]="40"/>
+                        </div>
+                    </div>
+                    <div class="button-splitter"></div>
+                    <div class="oauth-button-l1">
+                        <div>
+                        Sign in with Gitlab
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-button (click)="displayAuthentCard()">Cancel</button>
+        </mat-card-actions>
+    </mat-card>
+</div>

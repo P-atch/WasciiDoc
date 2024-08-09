@@ -1,0 +1,197 @@
+@use '@angular/material' as mat;
+//@include "@angular/material/prebuilt-themes/purple-green.css" as xxx;
+@include mat.core();
+
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  overflow: hidden;
+
+
+}
+
+$my-dark-theme: mat.define-theme((
+ color: (
+    theme-type: dark,
+    //primary: mat.$violet-palette,
+         primary: mat.$spring-green-palette,
+  ),
+));
+
+$my-light-theme: mat.define-theme((
+ color: (
+    theme-type: light,
+    //primary: mat.$violet-palette,
+         primary: mat.$spring-green-palette,
+  ),
+));
+
+//#main_toolbar {
+//  @include mat.all-component-themes($my-theme);
+//  background-color: mat.get-theme-color($my-theme, background);
+//  border-bottom: mix(mat.get-theme-color($my-theme, background), white, 70%) 1px solid;
+//  box-shadow: 3px 3px 3px mix(mat.get-theme-color($my-theme, background), white, 70%);
+//}
+#main_toolbar {
+  z-index: 1000;
+}
+
+body {
+  background-color: mat.get-theme-color($my-dark-theme, background);
+}
+
+a:hover {
+  opacity: 90%;
+}
+
+a {
+  text-decoration: none;
+}
+
+.other-users-button {
+  width: 110px;
+  background-color: mat.get-theme-color($my-light-theme, primary);
+
+  border: 1px solid mix(mat.get-theme-color($my-light-theme, primary), white, 60%);
+  height: 40px;
+  color: black;
+  font-size: initial;
+
+}
+
+.full-size-loader {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 99999;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  align-content: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  mat-progress-bar {
+    width: 80%;
+  }
+}
+
+////////////////// Theming
+
+
+
+.dark-theme {
+  color: white;
+
+  @include mat.all-component-themes($my-dark-theme);
+  #main_toolbar {
+    color: mat.get-theme-color($my-light-theme, primary);
+    background-color: mat.get-theme-color($my-dark-theme, background);
+    border-bottom: mix(mat.get-theme-color($my-dark-theme, background), white, 70%) 1px solid;
+    box-shadow: 1px 1px 1px mix(mat.get-theme-color($my-dark-theme, background), white, 70%);
+  }
+
+  background-color: mat.get-theme-color($my-dark-theme, background);
+  //body {
+  //  background-color: mat.get-theme-color($my-dark-theme, background);
+  //}
+
+  .wrapper {
+    //background-color: mix(mat.get-theme-color($my-light-theme, background), black, 70%);
+    background-color: #1e2126;
+    color: white;
+    border-right: 3px solid black;
+  }
+  .resize-handle-right {
+    background-color: mix(mat.get-theme-color($my-light-theme, background), black, 70%);
+    box-shadow: 1px 1px 1px mix(mat.get-theme-color($my-light-theme, background), black, 70%);
+  }
+
+  mat-card {
+    @include mat.card-color($my-dark-theme);
+    background-color: mix(mat.get-theme-color($my-dark-theme, surface), white, 70%);
+    color: white;
+  }
+
+  .editor_toolbar {
+    background-color: mat.get-theme-color($my-dark-theme, background);
+  }
+
+  // Editor
+  .passive_editor {
+    background-color: white;
+    color: black;
+  }
+  ////
+
+  a{
+  color: mix(mat.get-theme-color($my-dark-theme, primary), white, 60%);;
+  }
+  a:visited{
+  color: mix(mat.get-theme-color($my-dark-theme, primary), white, 60%);;
+  }
+
+  .full-size-loader {
+    background-color: mat.get-theme-color($my-dark-theme, background);
+  }
+}
+
+.light-theme {
+  color: black;
+
+  @include mat.all-component-themes($my-light-theme);
+  #main_toolbar {
+    color: mat.get-theme-color($my-light-theme, primary);
+    background-color: mat.get-theme-color($my-light-theme, background);
+    border-bottom: mix(mat.get-theme-color($my-light-theme, background), black, 70%) 1px solid;
+    box-shadow: 1px 1px 1px mix(mat.get-theme-color($my-light-theme, background), black, 70%);
+  }
+
+  background-color: mat.get-theme-color($my-light-theme, background);
+
+  .wrapper {
+    background-color: mix(mat.get-theme-color($my-light-theme, background), white, 70%);
+
+  }
+  .resize-handle-right {
+    background-color: mix(mat.get-theme-color($my-light-theme, background), black, 70%);
+    box-shadow: 1px 1px 1px mix(mat.get-theme-color($my-light-theme, background), black, 70%);
+
+  }
+
+
+  mat-card {
+    @include mat.card-color($my-light-theme);
+  }
+
+  .editor_toolbar {
+    background-color: mat.get-theme-color($my-light-theme, background);
+  }
+
+  ///// Editor
+  .passive_editor {
+    background-color: white;
+    color: black;
+  }
+  ////
+  a{
+  color: mix(mat.get-theme-color($my-light-theme, primary), white, 60%);;
+  }
+  a:visited{
+  color: mix(mat.get-theme-color($my-light-theme, primary), white, 60%);;
+  }
+
+  .full-size-loader {
+    background-color: mat.get-theme-color($my-light-theme, background);
+  }
+
+}
+
+//html {
+//  @include mat.all-component-themes($my-theme);
+//}

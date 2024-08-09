@@ -1,0 +1,13 @@
+<div style="z-index: 99999999;">
+
+<h2 mat-dialog-title>Set name</h2>
+<mat-dialog-content>
+    <mat-form-field appearance="outline">
+        <input matInput [(ngModel)]="doc_name" placeholder="Document name">
+    </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close (click)="onNoClick()">Cancel</button>
+  <button mat-button mat-dialog-close cdkFocusInitial [matDialogClose]="doc_name()">Ok</button>
+</mat-dialog-actions>
+</div>

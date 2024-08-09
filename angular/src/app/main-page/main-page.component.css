@@ -1,0 +1,45 @@
+.document-card {
+  max-width: 400px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+
+.example-header-image {
+  background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
+  background-size: cover;
+}
+
+.doc-grid-list {
+  margin-top: 1%;
+}
+
+.little-spacer {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.welcome-tab {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+
+.welcome-footer {
+
+  /*position: fixed;*/
+  position: fixed;
+
+  bottom: 0;
+  width: 100%;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  justify-content: center;
+  display: flex;
+  height: 5%;
+}
+
+

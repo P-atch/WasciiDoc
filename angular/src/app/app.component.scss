@@ -1,0 +1,127 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+
+.little-spacer {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+/*.little-spacer {
+  margin-left: 0.5%;
+  margin-right: 0.5%;
+}*/
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+app-editor {
+  flex: 1;
+}
+
+
+//#main_toolbar {
+//  @include mat.all-component-themes($my-theme);
+//  background-color: mat.get-theme-color($my-theme, background);
+//  border-bottom: mix(mat.get-theme-color($my-theme, background), white, 70%) 1px solid;
+//  box-shadow: 3px 3px 3px mix(mat.get-theme-color($my-theme, background), white, 70%);
+//}
+
+
+
+//html {
+//  @include mat.all-component-themes($my-theme);
+//}
+
+//////////// Connection layout
+
+.connect-card-container {
+    /*display: flex;*/ /* Hide at startup*/
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    margin: 0; /* Remove default margin */
+    z-index: 999999999;
+
+}
+
+.connect-card {
+    max-width: 400px;
+    min-width: 10%;
+    position: fixed;
+    top: 20%;
+}
+
+.example-header-image {
+    background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
+    background-size: cover;
+}
+
+#github_oauth_btn {
+    color: #fff;
+    background-color: #444;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#github_oauth_btn:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+#gitlab_oauth_btn {
+    color: #fff;
+    background-color: #fc6d26;
+    border: 1px solid #e24329;
+}
+
+#gitlab_oauth_btn:hover {
+    background-color: #e24329;
+}
+
+.oauth-provider-icon {
+
+}
+
+.oauth-button {
+    width: 90%;
+    min-width: 200px;
+    height: 50px;
+    border: #3f4948 1px solid;
+
+    align-content: center;
+    vertical-align: middle;
+    display: flex;
+    padding: 5px 5px 5px 5px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+.oauth-button-l1 {
+    align-content: center;
+    vertical-align: middle;
+    padding: 1px 1px 1px 5px;
+}
+
+.oauth-button:hover {
+    cursor: pointer;
+}
+
+.oauth-button:hover {
+    border: #1e2126;
+}
+
+.oauth-provider-icon-container {
+    padding-right: 4px;
+    margin-right: 2px;
+    align-content: center;
+    vertical-align: middle;
+}
+
+.button-splitter {
+    height: 100%;
+    width: 1px;
+    background-color: #465353;
+}

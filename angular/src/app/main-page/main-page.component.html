@@ -1,0 +1,60 @@
+<ng-template #newDocumentTemplate>
+    <button mat-fab extended (click)="newDocument()">
+      New
+    </button>
+    <span class="little-spacer"></span>
+</ng-template>
+
+<mat-tab-group animationDuration="300ms" style="height: 100vh;" >
+    <mat-tab label="Welcome">
+        <div class="welcome-tab">
+            <img ngSrc="/icon_256.png" alt="logo"  width="256" height="256">
+            <h1>Welcome to WasciiDoc</h1>
+            <h2>What is WasciiDoc ?</h2>
+            <p>
+                WasciiDoc is an online AsciiDoc editor, created with the same idea as <a href="https://hedgedoc.org/" target="_blank">HedgeDoc</a>.<br>
+                It aims to offer a similar experience with AsciiDoc, and possibly support more languages in the future.
+            </p>
+            <h2>How to</h2>
+            <p>
+                Based on <a href="https://asciidoctor.org/" target="_blank">AsciiDoctor</a> as a backend converter, all the possibilities
+                offered by AsciiDoctor are shared with this project.<br>
+                Visit <a href="https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/" target="_blank">AsciiDoc documentation</a> for the language syntax.<br>
+                And test all the possibilities by yourself : <a href="javascript:void(0)" (click)="this.newDocument(true)">Example document</a>
+            </p>
+        </div>
+        <div class="welcome-footer">
+            <div style="width: fit-content; text-align: center; align-items: center; align-content: center;">
+            <p>License - <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY 4.0</a></p>
+            </div>
+        </div>
+    </mat-tab>
+    <mat-tab label="Documents">
+        <h1>Documents</h1>
+        <div style="display:flex; flex-wrap: wrap; flex-direction: row;">
+            <div *ngFor="let doc of documents">
+                <mat-card class="document-card" appearance="outlined">
+                    <a href="/editor/{{doc.doc_uuid}}" style="text-decoration: none">
+                    <mat-card-header>
+                        <div mat-card-avatar class="example-header-image"></div>
+                        <mat-card-title>{{ doc.doc_name }}</mat-card-title>
+                        <mat-card-subtitle >Owner : {{ doc.owner_known_name }}(#{{doc.owner}})</mat-card-subtitle>
+                        <mat-card-subtitle *ngIf="doc.restriction == 0" matTooltip="Only proprietary can access and edit">Permission : Private <mat-icon>pan_tool</mat-icon></mat-card-subtitle>
+                        <mat-card-subtitle *ngIf="doc.restriction == 1" matTooltip="Only proprietary can edit (no public read access)">Permission : Protected<mat-icon>beach_access</mat-icon></mat-card-subtitle>
+                        <mat-card-subtitle *ngIf="doc.restriction == 2" matTooltip="Only proprietary can edit">Permission : Locked<mat-icon>lock</mat-icon></mat-card-subtitle>
+                        <mat-card-subtitle *ngIf="doc.restriction == 3" matTooltip="No public edit">Permission : Limited<mat-icon>perm_identity</mat-icon></mat-card-subtitle>
+                        <mat-card-subtitle *ngIf="doc.restriction == 4" matTooltip="Public read and edit">Permission : Editable<mat-icon>edit</mat-icon></mat-card-subtitle>
+                    </mat-card-header>
+                    </a>
+                    <mat-card-content>
+                    </mat-card-content>
+                    <mat-card-actions>
+                        <button mat-button (click)="deleteDocument(doc.doc_uuid)">Delete</button>
+                        <button mat-button>Rename</button>
+                    </mat-card-actions>
+                </mat-card>
+
+            </div>
+        </div>
+    </mat-tab>
+</mat-tab-group>

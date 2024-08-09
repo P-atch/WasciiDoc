@@ -1,0 +1,95 @@
+@use '../../styles' as s;
+//@include s;
+
+.little-spacer {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+
+.wrapper {
+  //width: 99.8%;
+  width: 100%;
+  height: 98%;
+  z-index: 1;
+  bottom: 0;
+  overflow: auto;
+  outline: none;
+
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+
+  resize: none; /*remove the resize handle on the bottom right*/
+}
+
+
+
+.editor_cursor_container {
+  width: 100%;
+  height: 99%;
+}
+
+.result_tile {
+  width: 100%;
+  height: 99%;
+  overflow: scroll;
+  //border: 3px solid black;
+}
+
+mwlResizable {
+  box-sizing: border-box; // required for the enableGhostResize option to work
+}
+
+.resize-handle-right {
+  //right: 0;
+
+  cursor: col-resize;
+  height: 100%;
+  width: 0.5%;
+  //background-color: red;
+  //opacity: 0%;
+  //border: 3px solid red;
+  //width: 10%;
+}
+
+.editor_container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  bottom: 20%;
+}
+
+.active_editor {
+  display: flex;
+  min-height: 8%;
+}
+
+.passive_editor {
+  min-height: 1%;
+
+}
+
+.visual-cursor {
+  position: absolute;
+  width: 5px;
+  height: 1.2em; /* Height should match the line height of the textarea */
+  background-color: red;
+  z-index: 2;
+  pointer-events: none; /* Make sure the cursor doesn't interfere with text input */
+  //transition: top 0.5s ease, left 0.5s ease;
+}
+
+.editor_toolbar_container {
+  width: 100%;
+  height: 100%;
+
+}
+
+.editor_toolbar {
+  padding-bottom: 4px;
+  padding-top: 4px;
+  height: fit-content;
+}
+
+

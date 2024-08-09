@@ -1,0 +1,158 @@
+<!--<ngx-codemirror
+  [(ngModel)]="defaults[mode]"
+  [options]="{
+    theme: 'material',
+    mode: 'markdown'
+  }"
+></ngx-codemirror>
+-->
+<!--<mat-button-toggle-group
+  [hideSingleSelectionIndicator]="true" (change)="viewSelectorToggled($event)">
+  <mat-button-toggle value="edit"><mat-icon aria-hidden="false" aria-label="Edit view" fontIcon="edit"></mat-icon></mat-button-toggle>
+  <mat-button-toggle value="splitted"><mat-icon aria-hidden="false" aria-label="Splitted view" fontIcon="vertical_split"></mat-icon></mat-button-toggle>
+  <mat-button-toggle value="view"><mat-icon aria-hidden="false" aria-label="Read view" fontIcon="format_align_center"></mat-icon></mat-button-toggle>
+</mat-button-toggle-group>-->
+<ng-template #documentTitle>
+    <div style="display: flex;align-items: center;justify-content: center;">
+    <!--<p>{{this.documentInfos.doc_name}}</p>-->
+    <span>{{this.documentService.documentInfos.doc_name}}</span>
+    <span class="little-spacer"></span>
+    <button mat-button value="view" (click)="setDocumentName()">
+      <mat-icon aria-hidden="false" aria-label="Read view" fontIcon="edit"></mat-icon>
+    </button>
+    <span class="little-spacer"></span>
+    </div>
+</ng-template>
+
+<ng-template #editorSwitcherTemplate>
+  <mat-button-toggle-group id="editorSwitcher" [(value)]="editorViewValue"
+    [hideSingleSelectionIndicator]="true" (change)="viewSelectorToggled($event)">
+    <mat-button-toggle value="edit">
+      <mat-icon aria-hidden="false" aria-label="Edit view" fontIcon="edit"></mat-icon>
+    </mat-button-toggle>
+    <mat-button-toggle value="splitted">
+      <mat-icon aria-hidden="false" aria-label="Splitted view" fontIcon="vertical_split"></mat-icon>
+    </mat-button-toggle>
+    <mat-button-toggle value="view">
+      <mat-icon aria-hidden="false" aria-label="Read view" fontIcon="format_align_center"></mat-icon>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+    <span class="little-spacer"></span>
+</ng-template>
+
+<ng-template #otherUsersTemplate>
+    <button class="other-users-button" mat-fab  [matMenuTriggerFor]="menu" aria-label="Other users">
+        <div style="display: flex;align-content: center;align-items: center;justify-content: center;">
+            <mat-icon>group</mat-icon>
+            <span>{{connectedUsers.size}} Online</span>
+            <mat-icon>expand_more</mat-icon>
+        </div>
+    </button>
+    <mat-menu #menu="matMenu">
+        <mat-list>
+            <div *ngFor="let client_id of connectedUsers.keys()">
+                <div style="display: flex;align-content: center;align-items: center;justify-content: center">
+                    <div style="width: 10px; height: 20px;" [style.background-color]="client_cursors_colors.get(client_id)"></div>
+                    <mat-card-content >{{ connectedUsers.get(client_id)?.username }}</mat-card-content>
+                </div>
+                <mat-divider></mat-divider>
+            </div>
+        </mat-list>
+
+    </mat-menu>
+</ng-template>
+
+<!--<ng-template #documentRestriction>
+    <button mat-button [matMenuTriggerFor]="aboveMenu">Above</button>
+    <mat-menu #aboveMenu="matMenu" yPosition="above">
+      <button mat-menu-item>Item 1</button>
+      <button mat-menu-item>Item 2</button>
+    </mat-menu>
+</ng-template>-->
+<app-document-restriction></app-document-restriction>
+<app-doc-owners></app-doc-owners>
+
+
+<div class="editor_container" #editor_container>
+
+
+  <div  class="active_editor" mwlResizable [enableGhostResize]="true"  (resizeEnd)="onResize($event)" (resizing)="onResize($event)" [style.width.%]="active_editor_width" #active_editorRef>
+
+    <!--<div class="NgxEditor__Wrapper" [hidden]="editor_hidden">
+      <ngx-editor-menu [editor]="editor" > </ngx-editor-menu>
+      <ngx-editor [editor]="editor" [ngModel]="html" [disabled]="false" [placeholder]="'Type here...'" (ngModelChange)="onChange(this)"></ngx-editor>
+    </div>-->
+
+        <div class="editor_toolbar_container">
+            <mat-toolbar class="editor_toolbar" *ngIf="!editor_hidden">
+                <button mat-mini-fab aria-label="Format bold" (click)="formatToken($event, '**')">
+                    <mat-icon>format_bold</mat-icon>
+                </button>
+                <button mat-mini-fab aria-label="Format italic" (click)="formatToken($event, '__')">
+                    <mat-icon>format_italic</mat-icon>
+                </button>
+                <button mat-mini-fab aria-label="Format highlighted" (click)="formatToken($event, '##')">
+                    <mat-icon>drive_file_rename_outline</mat-icon>
+                </button>
+                <button mat-mini-fab (click)="formatLink($event)">
+                    <mat-icon>link</mat-icon>
+                </button>
+                <button mat-mini-fab aria-label="Insert image" (click)="formatImageLink($event)">
+                    <mat-icon>image</mat-icon>
+                </button>
+                <button mat-mini-fab (click)="formatTable($event)">
+                    <mat-icon>table_rows_narrow</mat-icon>
+                </button>
+                <button mat-mini-fab (click)="sendImage($event)">
+                    <mat-icon>attachment</mat-icon>
+                </button>
+                <span class="little-spacer"></span>
+                <mat-button-toggle-group [(value)]="scrollAttachValue"
+                    [hideSingleSelectionIndicator]="true">
+                    <mat-button-toggle value="attached" matTooltip="Editor and render are always synchronized">
+                        <mat-icon aria-hidden="false" aria-label="Attached" fontIcon="link"></mat-icon>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="semi-attached" matTooltip="Editor and render are synchronized on edit">
+                        <mat-icon aria-hidden="false" aria-label="Semi-attached" fontIcon="vertical_split"></mat-icon>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="detached" matTooltip="Editor and render are not scroll synchronized">
+                        <mat-icon aria-hidden="false" aria-label="Detached" fontIcon="link_off"></mat-icon>
+                    </mat-button-toggle>
+                </mat-button-toggle-group>
+                <span class="little-spacer"></span>
+            </mat-toolbar>
+            <div class="editor_cursor_container" #editor_cursor_container_ref>
+
+            <!--<textarea (input)="onChange()" class="wrapper" [hidden]="editor_hidden" (click)="updateLocalCursorPosition($event)" #textareaRef></textarea>-->
+                <ngx-monaco-editor style="z-index: 2;" (onInit)="editorOnInit($event)" [options]="monacoEditorOptions" [(ngModel)]="monacoCode" class="wrapper" (input)="onChange()" (click)="updateLocalCursorPosition($event)" #textareaRef></ngx-monaco-editor>
+        </div>
+
+        <!--<div class="visual-cursor" [ngStyle]="{'top.px': cursorY, 'left.px': cursorX}"></div>-->
+    </div>
+    <div
+      class="resize-handle-right"
+      mwlResizeHandle
+      [resizeEdges]="{ right: true }"
+      style="z-index: 999;"
+    ></div>
+  </div>
+
+
+  <div class="passive_editor" [style.width.%]="passive_editor_width">
+    <div class="result_tile" (wheel)="syncScroll(['attached'])" #result_displayer>
+    </div>
+  </div>
+</div>
+
+<input type="file" #imageInput (change)="onImageSelected($event)" style="display: none;" />
+
+<div class="full-size-loader" *ngIf="getLoadPercent() < 100">
+    <img ngSrc="/icon_256.png" alt="Icon" width="256" height="256"/>
+    <mat-progress-bar mode="determinate" [value]="getLoadPercent()">
+    </mat-progress-bar>
+    <button mat-button value="view" (click)="router.navigate(['/'])">
+      Cancel
+    </button>
+
+</div>
+<!--<pre><textarea [highlightAuto]="code" language="html" lineNumbers></textarea></pre>-->
