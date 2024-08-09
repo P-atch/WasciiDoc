@@ -1,0 +1,12 @@
+src/.env
+.idea
+.angular
+node_modules
+dist
+__pycache__
+build
+angular_bckp
+*.egg-info
+venv
+data
+workdir

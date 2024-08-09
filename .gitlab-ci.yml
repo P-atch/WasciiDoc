@@ -1,0 +1,7 @@
+image: debian:latest
+
+build-docker:
+  stage: build
+  when: manual
+  script:
+    - docker build . -t wasciidoc:latest
