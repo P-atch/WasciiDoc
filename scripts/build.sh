@@ -4,6 +4,7 @@ RESET="\e[0m"
 
 cd angular
 npm i
+npm install -g @angular/cli@17
 ng build
 echo -e "${GREEN}Successfully built app${RESET}"
 cd ..
