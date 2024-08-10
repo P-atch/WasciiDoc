@@ -60,7 +60,8 @@ setup(
         'requests',
         'Authlib',
         'gunicorn',
-        'gevent'
+        'gevent',
+        'eventlet'
     ],
 
 )

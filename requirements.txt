@@ -1,5 +1,9 @@
-Flask
-flask_socketio
-eventlet
+flask
+flask-socketio
+asciidoc
+python-dotenv
 requests
 Authlib
+gunicorn
+gevent
+eventlet
