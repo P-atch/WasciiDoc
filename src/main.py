@@ -1,28 +1,17 @@
-import base64
-import binascii
 import os
-import random
-import shutil
-from flask import Flask, render_template, redirect, url_for, make_response, session, abort, send_from_directory, \
-    send_file, request
-from flask_socketio import SocketIO, emit, leave_room, rooms
+from flask import Flask, render_template, redirect, url_for, make_response, session, abort, send_file
+from flask_socketio import SocketIO
 from dotenv import dotenv_values
 from converter import Converter
 from auth_manager import AuthManager, User
 from db_manager import DbManager
-from document_restriction import DocumentRestriction
 import re
-from pathlib import Path
 from rooms_manager import RoomsManager
 from documents_manager import DocumentManager
 import logging
 from socket_manager import SocketManager
 
-
-
-
-
-app_config = dotenv_values("../workdir/.env")
+app_config = dotenv_values(".env")
 
 if app_config.get("WASCII_DEBUG"):
     print("Loading DEBUG config")
@@ -117,6 +106,7 @@ def gitlab_oauth_callback():
     session["token"] = token
     auth_manager.get_userinfos()
     print(f"Session started : {session.get('user')}")
+    session["auth_method"] = "gitlab"
     return redirect(url_for("root"))
 
 
@@ -128,6 +118,7 @@ def github_oauth_callback():
     session["token"] = token
     auth_manager.get_userinfos()
     print(f"Session started : {session.get('user')}")
+    session["auth_method"] = "github"
     return redirect(url_for("root"))
 
 

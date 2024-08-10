@@ -7,8 +7,6 @@ from objects.user import User
 from objects.db_document import DbDocument
 
 
-
-
 class DbManager:
     def __init__(self, db_path: str):
         self.logger = logging.getLogger(__name__)
@@ -51,7 +49,8 @@ class DbManager:
             restriction_filter = DocumentRestriction.LOCKED
             if user_uuid is None:
                 restriction_filter = DocumentRestriction.PROTECTED
-            self.logger.info(f"Searching document '{doc_uuid}' for user {user_uuid} with minimum permission '{restriction_filter}'")
+            self.logger.info(
+                f"Searching document '{doc_uuid}' for user {user_uuid} with minimum permission '{restriction_filter}'")
             cursor.execute(
                 "SELECT document_uuid, document_name, documents.user_uuid, restriction, known_name FROM documents "
                 "JOIN known_users ON known_users.user_uuid=documents.user_uuid "
@@ -116,7 +115,8 @@ class DbManager:
     def get_user_by_uuid(self, user_uuid) -> User:
         db, cursor = self.open_db()
         try:
-            cursor.execute("SELECT known_name, profile_image_url, user_uuid FROM known_users WHERE user_uuid=?", (user_uuid,))
+            cursor.execute("SELECT known_name, profile_image_url, user_uuid FROM known_users WHERE user_uuid=?",
+                           (user_uuid,))
             res = cursor.fetchall()
             if len(res) != 0:
                 return User(res[0][0], res[0][1], res[0][2])
@@ -132,7 +132,7 @@ class DbManager:
                 min_restriction = DocumentRestriction.EDITABLE
             prev_len = len(self.list_documents(user_uuid))
             cursor.execute("DELETE FROM documents WHERE document_uuid=? AND (user_uuid=? OR restriction>=?)",
-                           (doc_uuid, user_uuid, min_restriction, ))
+                           (doc_uuid, user_uuid, min_restriction,))
             db.commit()
             if len(self.list_documents(user_uuid)) == prev_len:
                 return False

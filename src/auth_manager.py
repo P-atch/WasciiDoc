@@ -1,5 +1,4 @@
 import functools
-from datetime import datetime
 import authlib.integrations.base_client.errors
 import requests.exceptions
 from flask import session
@@ -22,11 +21,11 @@ class AuthManager:
         self.oauth = OAuth(app)
         self.oauth.init_app(app)
         self.enable_gitlab_oauth = False
-        if str(app_config.get("ENABLE_GITLAB_OAUTH").lower()) == "true":
+        if str(app_config.get("ENABLE_GITLAB_OAUTH")).lower() == "true":
             self.enable_gitlab_oauth = True
             self.oauth.register("gitlab", client_kwargs={'scope': 'openid'})
         self.enable_github_oauth = False
-        if str(app_config.get("ENABLE_GITHUB_OAUTH").lower()) == "true":
+        if str(app_config.get("ENABLE_GITHUB_OAUTH")).lower() == "true":
             self.enable_github_oauth = True
             self.oauth.register("github")
 
@@ -45,7 +44,7 @@ class AuthManager:
             try:
                 user = self.oauth.gitlab.userinfo(token=session.get("token"))
             except (MissingTokenError, requests.exceptions.HTTPError, authlib.integrations.base_client.errors.OAuthError) as e:
-                self.logger.warning(f"Invalid auth error : {e}")
+                #self.logger.warning(f"Invalid auth error : {e}")
                 session["user"] = None
                 session["auth_method"] = None
             if user is not None:
@@ -58,7 +57,7 @@ class AuthManager:
                 session["user"] = User.from_github(res.json()).json()
                 session["auth_method"] = "github"
             except (MissingTokenError, requests.exceptions.HTTPError, authlib.integrations.base_client.errors.OAuthError) as e:
-                self.logger.warning("Invalid auth error : ", e)
+                #self.logger.warning("Invalid auth error : ", e)
                 session["user"] = None
                 session["auth_method"] = None
 

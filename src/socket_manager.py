@@ -1,27 +1,17 @@
 import base64
 import binascii
 import os
-import random
-import functools
 import shutil
-
-from flask import Flask, render_template, redirect, url_for, make_response, session, abort, send_from_directory, \
-    send_file, request
+from flask import session, request
 from flask_socketio import SocketIO, emit, leave_room, rooms
 from flask_socketio.namespace import Namespace
-from dotenv import dotenv_values
 from converter import Converter
 from auth_manager import AuthManager, User
 from db_manager import DbManager
 from document_restriction import DocumentRestriction
-import re
 from pathlib import Path
-from rooms_manager import RoomsManager
-from documents_manager import DocumentManager
-import logging
 from usefull import gen_random_filename
 import logging
-import functools
 
 
 class SocketManager (Namespace):

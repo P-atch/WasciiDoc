@@ -1,15 +1,12 @@
 import functools
 from flask_socketio import emit, rooms, join_room, leave_room
-from datetime import datetime
 from flask import session
 import re
 import os
-import random
 from objects.user import User
 from documents_manager import DocumentManager
 import logging
 from objects.room import Room
-import threading
 import time
 
 
