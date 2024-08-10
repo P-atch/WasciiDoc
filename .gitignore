@@ -1,4 +1,3 @@
-src/.env
 .idea
 .angular
 node_modules
@@ -10,3 +9,4 @@ angular_bckp
 venv
 data
 workdir
+.env
