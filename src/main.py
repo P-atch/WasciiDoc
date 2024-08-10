@@ -13,6 +13,10 @@ from socket_manager import SocketManager
 
 app_config = dotenv_values(".env")
 
+for mandatory in ["WASCII_ASCIIDOCTOR_EXEC", "DATA_FOLDER"]:
+    if not os.environ.get(mandatory):
+        raise EnvironmentError(f"Missing mandatory environment key '{mandatory}'")
+
 if app_config.get("WASCII_DEBUG"):
     print("Loading DEBUG config")
     template_folder = "../angular/dist/wascii-doc/browser/"
