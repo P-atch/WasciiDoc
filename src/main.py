@@ -23,8 +23,8 @@ if os.environ.get("WASCII_DEBUG"):
     static_folder = "../angular/dist/wascii-doc/browser/"
 else:
     print("Loading production config")
-    template_folder = "templates"
-    static_folder = "static"
+    template_folder = "browser"
+    static_folder = "browser"
 data_folder = os.environ["DATA_FOLDER"]
 tmp_folder = os.path.join(data_folder, "documents")
 for e in [data_folder, tmp_folder]:

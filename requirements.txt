@@ -6,3 +6,4 @@ requests
 Authlib
 gunicorn
 gevent
+eventlet
