@@ -3,7 +3,8 @@ FROM debian:latest
 RUN apt update
 RUN apt -y install python3.11 asciidoctor python3-pip python3-setuptools
 COPY . /opt/wasciidoc
-RUN python3.11 /opt/wasciidoc/setup.py install
+#RUN python3.11 /opt/wasciidoc/setup.py install
+RUN python3.11 -m pip install -r /opt/wasciidoc/requirements.txt
 
 ENV PYTHONPATH="$PYTHONPATH;/opt/wasciidocapi/src/"
 
