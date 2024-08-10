@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, redirect, url_for, make_response, session, abort, send_file
 from flask_socketio import SocketIO
-from dotenv import dotenv_values
+from dotenv import dotenv_values, load_dotenv
 from converter import Converter
 from auth_manager import AuthManager, User
 from db_manager import DbManager
@@ -11,13 +11,13 @@ from documents_manager import DocumentManager
 import logging
 from socket_manager import SocketManager
 
-app_config = dotenv_values(".env")
+load_dotenv(".env")
 
 for mandatory in ["WASCII_ASCIIDOCTOR_EXEC", "DATA_FOLDER"]:
     if not os.environ.get(mandatory):
         raise EnvironmentError(f"Missing mandatory environment key '{mandatory}'")
 
-if app_config.get("WASCII_DEBUG"):
+if os.environ.get("WASCII_DEBUG"):
     print("Loading DEBUG config")
     template_folder = "../angular/dist/wascii-doc/browser/"
     static_folder = "../angular/dist/wascii-doc/browser/"
@@ -25,7 +25,7 @@ else:
     print("Loading production config")
     template_folder = "templates"
     static_folder = "static"
-data_folder = app_config["DATA_FOLDER"]
+data_folder = os.environ["DATA_FOLDER"]
 tmp_folder = os.path.join(data_folder, "documents")
 for e in [data_folder, tmp_folder]:
     try:
@@ -34,19 +34,19 @@ for e in [data_folder, tmp_folder]:
         pass
     if not os.path.exists(e):
         raise FileNotFoundError(e)
-os.environ["PATH"] = os.environ["PATH"] + f";{app_config.get('WASCII_RUBY_FOLDER')}"
+os.environ["PATH"] = os.environ["PATH"] + f";{os.environ.get('WASCII_RUBY_FOLDER')}"
 
-logging.basicConfig(level=app_config.get("WASCII_LOG_LEVEL", "INFO"))
+logging.basicConfig(level=os.environ.get("WASCII_LOG_LEVEL", "INFO"))
 app = Flask(__name__, template_folder=template_folder, static_folder=static_folder, static_url_path="/")
 app.config["SECRET_KEY"] = "secret!"
 socketio = SocketIO(app)
-converter = Converter(tmp_folder, app_config["WASCII_ASCIIDOCTOR_EXEC"])
+converter = Converter(tmp_folder, os.environ["WASCII_ASCIIDOCTOR_EXEC"])
 
 
 
 
 db_manager = DbManager(data_folder + "/" + "db.sqlite")
-auth_manager = AuthManager(app, app_config, db_manager)
+auth_manager = AuthManager(app, os.environ, db_manager)
 document_manager = DocumentManager(tmp_folder)
 rooms_manager = RoomsManager(socketio, document_manager)
 #socket_manager = SocketManager(socketio, auth_manager, db_manager)
@@ -88,7 +88,7 @@ def get_static_file(doc_uuid, filename):
 
 @app.route("/auth/gitlab/login")
 def login_gitlab():
-    if not str(app_config.get("ENABLE_GITLAB_OAUTH").lower()) == "true":
+    if not str(os.environ.get("ENABLE_GITLAB_OAUTH").lower()) == "true":
         abort(404)
     redirect_uri = url_for("gitlab_oauth_callback", _external=True)
     return auth_manager.oauth.gitlab.authorize_redirect(redirect_uri)
@@ -96,7 +96,7 @@ def login_gitlab():
 
 @app.route("/auth/github/login")
 def login_github():
-    if not str(app_config.get("ENABLE_GITHUB_OAUTH").lower()) == "true":
+    if not str(os.environ.get("ENABLE_GITHUB_OAUTH").lower()) == "true":
         abort(404)
     redirect_uri = url_for("github_oauth_callback", _external=True)
     return auth_manager.oauth.github.authorize_redirect(redirect_uri)
@@ -104,7 +104,7 @@ def login_github():
 
 @app.route("/auth/gitlab/callback")
 def gitlab_oauth_callback():
-    if not str(app_config.get("ENABLE_GITLAB_OAUTH").lower()) == "true":
+    if not str(os.environ.get("ENABLE_GITLAB_OAUTH").lower()) == "true":
         abort(404)
     token = auth_manager.oauth.gitlab.authorize_access_token()
     session["token"] = token
@@ -116,7 +116,7 @@ def gitlab_oauth_callback():
 
 @app.route("/auth/github/callback")
 def github_oauth_callback():
-    if not str(app_config.get("ENABLE_GITHUB_OAUTH").lower()) == "true":
+    if not str(os.environ.get("ENABLE_GITHUB_OAUTH").lower()) == "true":
         abort(404)
     token = auth_manager.oauth.github.authorize_access_token()
     session["token"] = token

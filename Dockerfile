@@ -7,6 +7,8 @@ COPY . /opt/wasciidoc
 RUN python3.11 -m pip install --break-system-packages -r /opt/wasciidoc/requirements.txt
 
 ENV PYTHONPATH="/opt/wasciidoc/src/"
+ENV DATA_FOLDER="/opt/wasciidoc/workdir/"
+ENV WASCII_ASCIIDOCTOR_EXEC="asciidoctor"
 
 EXPOSE 80
 RUN mkdir /opt/wasciidoc/workdir
