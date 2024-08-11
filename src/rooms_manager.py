@@ -101,7 +101,7 @@ class RoomsManager:
             doc_uuid = doc_uuids[0]
             if not os.path.exists(
                     os.path.join(self.document_manager.get_document_folder(doc_uuid), doc_uuid + ".adoc")):
-                self.logger.warning("User is in a room but has no access to document, disconnecting")
+                self.logger.error("User is in a room but document does not exists, disconnecting")
                 emit("display_error", {"error": "This document doesn't seems to exist"})
                 self.remove_room_user(doc_uuid, client_id)
                 return
@@ -113,4 +113,33 @@ class RoomsManager:
             self._get_room(doc_uuid).update_user_last_seen(client_id)
             return function(*args, **kwargs)
 
+        return decorator
+
+    def require_write_permission(self, function):
+
+        @functools.wraps(function)
+        def decorator(*args, **kwargs):
+            doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
+            if not doc_uuid:
+                # Shouldn't happen
+                self.logger.error("Check write permission but user not in any room, this should not happen")
+                return
+            client_id = session.get("client_id")
+            if not client_id:
+                # Shouldn't happen
+                self.logger.error("Client ID null, unable to check write permission")
+                emit("display_error", {"error": "You are not allowed to write this document"})
+                return
+            r = self._get_room(doc_uuid)
+            if not r:
+                # Shouldn't happen
+                self.logger.error("Can't get room for current user, unable to check write permission")
+                emit("display_error", {"error": "You are not allowed to write this document"})
+                return
+            user = r.get_user(client_id)
+            u_uuid = user.user_unique_identifier
+            if not self.document_manager.can_user_write_document(doc_uuid, u_uuid):
+                emit("display_error", {"error": "You are not allowed to write this document"})
+                return
+            return function(*args, **kwargs)
         return decorator

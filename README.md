@@ -10,7 +10,7 @@ inspired by the great project [Hedgedoc](https://github.com/hedgedoc/hedgedoc).
 ## Getting started
 
 - Try out a [demo instance]() to get discover the project
-- You can [setup your own instance using Docker](docs/deploy_with_docker.md)
+- Then [setup your own instance using Docker](docs/deploy_with_docker.md)
 
 ## Project status
 

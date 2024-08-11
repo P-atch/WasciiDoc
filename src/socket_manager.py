@@ -8,7 +8,7 @@ from flask_socketio.namespace import Namespace
 from converter import Converter
 from auth_manager import AuthManager, User
 from db_manager import DbManager
-from document_restriction import DocumentRestriction
+from src.objects.document_restriction import DocumentRestriction
 from pathlib import Path
 from usefull import gen_random_filename
 import logging
@@ -79,6 +79,7 @@ class SocketManager (Namespace):
 
     def on_key(self, data):
         @self.rooms_manager.require_editing_room
+        @self.rooms_manager.require_write_permission
         def _():
             doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
             update_id = data["update_id"]
@@ -96,6 +97,7 @@ class SocketManager (Namespace):
 
     def on_cursor_update(self, data):
         @self.rooms_manager.require_editing_room
+        @self.rooms_manager.require_write_permission
         def _():
             doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
             if data.get("client_id") is not None and data.get("cursor_position") is not None:
@@ -106,6 +108,7 @@ class SocketManager (Namespace):
 
     def on_send_image(self, data):
         @self.rooms_manager.require_editing_room
+        @self.rooms_manager.require_write_permission
         def _():
             doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
             u_info = self.auth_manager.get_userinfos()
@@ -146,6 +149,7 @@ class SocketManager (Namespace):
 
     def on_set_document_name(self, data):
         @self.rooms_manager.require_editing_room
+        @self.rooms_manager.require_write_permission
         def _():
             doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
             u_info = self.auth_manager.get_userinfos()
@@ -166,6 +170,7 @@ class SocketManager (Namespace):
 
     def on_set_document_restriction(self, data):
         @self.rooms_manager.require_editing_room
+        @self.rooms_manager.require_write_permission
         def _():
             doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
             u_info = self.auth_manager.get_userinfos()
@@ -212,7 +217,7 @@ class SocketManager (Namespace):
                 "html": self.converter.convert(content),
                 "client_id": client_id,
                 "update_id": self.rooms_manager.get_update_id(doc_uuid),
-                "client_cursors": []
+                "client_cursors": [],
             }
             emit("init_document_editor", ret)
         return _()
@@ -247,7 +252,15 @@ class SocketManager (Namespace):
             u_uid = 0
 
         if not example:
-            new_doc = self.db_manager.create_document("New document", u_uid, DocumentRestriction.EDITABLE)
+            conf_permission = os.environ.get("WASCII_DEFAULT_DOC_PERMISSION")
+            if conf_permission is None:
+                initial_restriction = DocumentRestriction.EDITABLE
+            else:
+                initial_restriction = DocumentRestriction.from_string(conf_permission)
+                if initial_restriction is None:
+                    self.logger.warning("Invalid document permission set in config, defaulting to EDITABLE")
+
+            new_doc = self.db_manager.create_document("New document", u_uid, initial_restriction)
             self.logger.info(f"Created document : {new_doc.json()}")
             os.mkdir(self.document_manager.get_document_folder(new_doc.doc_uuid))
             # with open(os.path.join(tmp_folder, new_doc.doc_uuid + ".adoc"), 'w') as f:  # Create the file

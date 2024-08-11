@@ -21,7 +21,7 @@ for mandatory in ["DATA_FOLDER"]:
 logging.basicConfig(level=os.environ.get("WASCII_LOG_LEVEL", "INFO"))
 logger = logging.getLogger()
 request_logger = logging.getLogger("app_req")
-request_logger.disabled = str(os.environ.get("ENABLE_REQUEST_LOGGING")).lower() == 'true'
+request_logger.disabled = str(os.environ.get("ENABLE_REQUEST_LOGGING")).lower() != 'true'
 
 if os.environ.get("WASCII_DEBUG"):
     logger.info("Loading DEBUG config")
@@ -52,7 +52,7 @@ converter = Converter(tmp_folder, os.environ.get("WASCII_ASCIIDOCTOR_EXEC", "asc
 
 db_manager = DbManager(data_folder + "/" + "db.sqlite")
 auth_manager = AuthManager(app, os.environ, db_manager)
-document_manager = DocumentManager(tmp_folder)
+document_manager = DocumentManager(tmp_folder, db_manager)
 rooms_manager = RoomsManager(socketio, document_manager)
 #socket_manager = SocketManager(socketio, auth_manager, db_manager)
 

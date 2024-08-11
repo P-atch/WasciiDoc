@@ -64,3 +64,6 @@ class Room:
         for client_id in client_ids_to_pop:
             self._users.pop(client_id)
             self._last_seens.pop(client_id)
+
+    def get_user(self, client_id) -> User | None:
+        return self._users.get(client_id)

@@ -11,8 +11,8 @@ import {fromEvent, Subscription} from "rxjs";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {LoaderService} from "../loader/loader.service";
 import {DocumentServiceService} from "./document-service/document-service.service";
-//import {RemoteCursorManager} from "@convergencelabs/monaco-collab-ext"
-import {EditorContentManager, RemoteCursorManager} from "../../monaco-collab-ext"
+import {RemoteCursor} from "@convergencelabs/monaco-collab-ext/typings/RemoteCursor";
+import {EditorContentManager, RemoteCursorManager} from "@convergencelabs/monaco-collab-ext";
 
 interface LoadedAssets {
   editorContent: boolean,
@@ -20,6 +20,17 @@ interface LoadedAssets {
   remote_content_init: boolean,
   ngOnInit: boolean,
   editorOnInit: boolean
+}
+
+interface Cursor {
+  cursor: RemoteCursor
+  color: string,
+  offset: number
+}
+
+interface ConnectedUser {
+  user: DbUser,
+  cursor: Cursor
 }
 
 @Component({
@@ -50,10 +61,11 @@ export class EditorComponent implements OnInit, OnDestroy {
   updateId = 0;
   clientId = undefined;
   //// Cursor update
-  client_cursors = new Map<string, number>;
-  client_cursors_colors = new Map<string, string>;
+  protected connectedUsers = new Map<string, ConnectedUser>;
   doc_uuid: string;
-  //// Scroll sync
+
+
+  protected readOnly = false;
   subscriptions: Subscription[] = [];
 
 
@@ -64,7 +76,6 @@ export class EditorComponent implements OnInit, OnDestroy {
     component_init: false,
     remote_content_init: false
   }
-  //loadedAssets = new Map<string, boolean>(("a", false));
 
   @ViewChild('textareaRef') textareaRef!: ElementRef;
   @ViewChild('themeButton') themeButtonRef!: ElementRef;
@@ -78,17 +89,16 @@ export class EditorComponent implements OnInit, OnDestroy {
   @ViewChild('editorSwitcherTemplate', { static: true }) editorSwitcherTemplateRef!: TemplateRef<any>;
   @ViewChild('otherUsersTemplate', { static: true }) otherUsersTemplateRef!: TemplateRef<any>;
   @ViewChild('documentTitle', { static: true }) documentTitleRef!: TemplateRef<any>;
-  //@ViewChild('activeEditorRef') active_editor!: ElementRef;
-
 
   readonly dialog = inject(MatDialog);
-  protected editorRef: any;   // Not Ngx detailed ICodeEditor https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.ICodeEditor.html
+  protected editorRef: any;   // No Angular detailed type for ICodeEditor https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.ICodeEditor.html
   private previousResultDisplayerScrollTop: number;
   private previousEditorScrollTop: number;
-  protected connectedUsers = new Map<string, DbUser>();
-  //protected mainLoaderValue: number = 10;
 
-  constructor(protected router: Router, private route: ActivatedRoute, private socket: SocketioService, private errorSnackBar: MatSnackBar, private toolbarService: ToolbarService, private loadingService: LoaderService, protected documentService: DocumentServiceService) {
+  constructor(protected router: Router, private route: ActivatedRoute,
+              private socket: SocketioService, private errorSnackBar: MatSnackBar,
+              private toolbarService: ToolbarService, private loadingService: LoaderService,
+              protected documentService: DocumentServiceService) {
   }
 
   getLoadPercent() : number {
@@ -98,7 +108,7 @@ export class EditorComponent implements OnInit, OnDestroy {
       if(this.loadedAssets[asset as keyof LoadedAssets]) {
         loaded += 1
       } else {
-        console.debug(`Waiting for ${asset}`);
+        //console.debug(`Waiting for ${asset}`);
       }
       count += 1;
     }
@@ -118,7 +128,6 @@ export class EditorComponent implements OnInit, OnDestroy {
   initEditor() {
     this.loadingService.increaseLoading();
     this.socket.emit("init_document_editor");
-    //this.mainLoaderValue += 20;
     this.loadedAssets.component_init = true;
   }
 
@@ -137,7 +146,6 @@ export class EditorComponent implements OnInit, OnDestroy {
     const bckpSelection = this.editorRef.getSelection();
 
     this.cursorsTimeOut = [];
-    //this.monacoCode = newCode;
 
     const contentManager = new EditorContentManager({
       editor:this.editorRef,
@@ -146,23 +154,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     contentManager.replace(0, this.monacoCode.length, newCode);
     this.editorRef.setSelection(bckpSelection);
     this.loadedAssets.editorContent = true;
-    //if(this.mainLoaderValue < 100) {this.mainLoaderValue += 10}
-    //console.log("Setting cursors at good position");
-    //console.log(this.client_cursors);
-    //for(let timeout of [100,200,300,400,500]) {
-    //  this.cursorsTimeOut.push(
-    //      setTimeout(() => {
-    //        for(let client_id of this.client_cursors.keys()) {
-    //          //console.log(`Having : ${client_id} : ${this.client_cursors.get(client_id.toString())}`);
-    //          this.remoteCursorManager.setCursorOffset(client_id.toString(), this.client_cursors.get(client_id.toString())!);
-    //        }
-    //      }, timeout)
-    //  );
-    //}
-
-
   }
-
 
   ngOnInit(): void {
     this.loadingService.resetLoading();
@@ -198,13 +190,11 @@ export class EditorComponent implements OnInit, OnDestroy {
       this.updatedContent = data["content"];
       this.setMonacoCode(data["content"]);
       this.updateId = data["update_id"];
-      //this.documentInfos = data["document"];
       this.documentService.documentInfos = data["document"];
       this.updatedHtml = data["html"];
       this.result_displayer.nativeElement.innerHTML = this.updatedHtml;
-      //this.mainLoaderValue = 100;
+      this.updateReadOnly()
       this.loadedAssets.remote_content_init = true;
-
     });
     /////// End of init events
 
@@ -222,15 +212,14 @@ export class EditorComponent implements OnInit, OnDestroy {
       }
       //this.documentInfos = data["document"];
       this.documentService.documentInfos = data["document"];
-      //this.documentInfos.doc_name = data["document"]["doc_name"];
-      //console.log("Received document infos : ", this.documentInfos);
-      console.log("Received document infos : ", this.documentService.documentInfos);
+      console.debug("Received document infos : ", this.documentService.documentInfos);
+      this.updateReadOnly();
+
     });
 
     this.socket.on("update", (data: any) => this.remoteContentUpdate(data));
 
     this.socket.on("client_cursor_update", (data: any) => {
-      console.log("CURSOR EVENT");
       this.updateRemoteCursorPosition(data["client_id"], data["cursor_position"]);
     })
 
@@ -252,25 +241,53 @@ export class EditorComponent implements OnInit, OnDestroy {
                                this.socket.emit("cursor_update", {"client_id": this.clientId, "cursor_position": this.getCaretPositionInText().foundStart})
                              }
                            }));
-    //this.subscriptions.push(fromEvent(window, 'wheel').subscribe( e => {
-    //  console.log("Wheel event");
-    //  this.syncScroll();
-    //}))
 
     this.socket.connected_user_list_observe().subscribe((connectedUsers) => {
-      console.log("Connected users : ", connectedUsers);
-      this.connectedUsers = connectedUsers;
-      for(let client_id of this.connectedUsers.keys()) {
-        if(!this.client_cursors_colors.get(client_id.toString())) {
-          this.client_cursors_colors.set(client_id.toString(), this.generateRandomColor());
-        }
-        // todo : Remove old users
-        // todo : thread ping pong
-      }
+      this.updateConnectedUsersList(connectedUsers)
 
     })
-    //this.mainLoaderValue += 10
     this.loadedAssets.ngOnInit = true;
+  }
+
+  updateConnectedUsersList(connectedUsers: Map<string, DbUser>) {
+    if(this.remoteCursorManager === undefined) {
+      setTimeout(()=> {
+        console.warn("this.remoteCursorManager undefined, waiting 1 sec");
+        this.updateConnectedUsersList(connectedUsers);
+      }, 1000);
+      return;
+    }
+    for(let client_id of connectedUsers.keys() ) {
+        if(!this.connectedUsers.get(client_id)) {
+          let color = this.generateRandomColor();
+          this.connectedUsers.set(client_id, {
+            user: connectedUsers.get(client_id)!,
+            cursor: {
+              cursor: this.remoteCursorManager.addCursor(client_id.toString(), color, "|"),
+              color: color,
+              offset: 0
+            }
+          })
+        }
+      }
+
+      for(let client_id of this.connectedUsers.keys()) {
+        if(!connectedUsers.get(client_id)) {
+          this.connectedUsers.get(client_id)!.cursor.cursor.dispose();
+          this.connectedUsers.delete(client_id);
+        }
+      }
+  }
+
+  updateReadOnly() {
+    if(this.editorRef === undefined) {
+      console.warn("editorRef undefined, waiting 1 sec and retrying updating readonly")
+      setTimeout(() => {this.updateReadOnly();}, 1000);
+      return;
+    }
+    this.readOnly = this.documentService.isReadOnly();
+    console.log(`Document : `, this.documentService.documentInfos);
+    console.log(`READ ONLY position : ${this.readOnly}`)
   }
 
   editorOnInit(editor: any) {
@@ -280,13 +297,6 @@ export class EditorComponent implements OnInit, OnDestroy {
       tooltips: true,
       tooltipDuration: 200
     })
-
-    //let cursor = this.remoteCursorManager.addCursor("jDoe", "blue", ".");
-    //cursor.setOffset(4);
-    //cursor.show();
-    //setInterval(() => {cursor.setOffset(cursor.getPosition().column+1)}, 2000);
-
-
 
     if(localStorage.getItem("theme") == "light") {
       editor._themeService.setTheme("vs");
@@ -300,7 +310,6 @@ export class EditorComponent implements OnInit, OnDestroy {
         editor._themeService.setTheme("vs");
       }
     });
-    //this.mainLoaderValue += 20;
     this.loadedAssets.editorOnInit = true;
   }
 
@@ -310,7 +319,6 @@ export class EditorComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.socket.emit("leave_room", this.doc_uuid);
     document.getElementById("editorSwitcher")!.style.visibility = "hidden";
-    //this.editor.destroy();
     this.toolbarService.removeElement(this.editorSwitcherTemplateRef);
     this.toolbarService.removeElement(this.documentTitleRef);
     this.toolbarService.removeElement(this.otherUsersTemplateRef, 'right');
@@ -336,17 +344,24 @@ export class EditorComponent implements OnInit, OnDestroy {
       return;
     }
     else if(data["update_id"] <= this.updateId) {
-      console.log(`Remote update ID (${data['update_id']}) <= our update ID(${this.updateId})`)
+      console.debug(`Remote update ID (${data['update_id']}) <= our update ID(${this.updateId})`)
     }
     this.updatedContent = data["content"];
     this.setMonacoCode(this.updatedContent);
     this.updateRemoteCursorPosition(data["client_id"], data["cursor_position"]);
   }
   onChange() {
-    //const textarea = this.getTextArea();
-    //this.updatedContent = textarea?.value!;
+    if(this.readOnly) {
+      // Cancel modifs
+      this.displayError({
+        error: "Can't edit in readOnly mode",
+        level: undefined,
+        requiredAction: undefined
+      });
+      this.monacoCode = this.updatedContent;
+      return;
+    }
     this.updatedContent = this.monacoCode;
-    //const cursor_position = textarea?.selectionStart;
     const {foundStart: cursor_position} = this.getCaretPositionInText();
 
     this.socket.emit("key", {"content": this.updatedContent, "update_id": this.updateId,
@@ -371,11 +386,7 @@ export class EditorComponent implements OnInit, OnDestroy {
       this.passive_editor_width = 100;
 
     }
-
     this.resizeEditor();
-
-    //this.editorRef.layout();
-
   }
 
   onResize(event: ResizeEvent): void {
@@ -402,35 +413,22 @@ export class EditorComponent implements OnInit, OnDestroy {
     }, 500);
   }
 
-  getTextArea() {
-    const textarea = document.querySelector("textarea");
-    if(!textarea) {
-      console.error("Text area not found");
-      return;
-    }
-    return textarea;
-  }
-
   /////////
 
   updateRemoteCursorPosition(client_id: string, cursor_position: number) {
     if(client_id == this.clientId) {
         return;
     }
-    if(this.client_cursors.get(client_id.toString()) === undefined) {
-      if(!this.client_cursors_colors.get(client_id.toString())) {
-        this.client_cursors_colors.set(client_id.toString(), this.generateRandomColor());
-      }
-      let cursor = this.remoteCursorManager.addCursor(client_id.toString(), this.client_cursors_colors.get(client_id.toString())!, "|");
-      cursor.show();
-      cursor.setOffset(0);
+    if(this.readOnly) {
+      return;
     }
-
     this.remoteCursorManager.setCursorOffset(client_id.toString(), cursor_position);
-    this.client_cursors.set(client_id.toString(), cursor_position);
   }
 
   updateLocalCursorPosition(_: any) {
+    if(this.readOnly) {
+      return;
+    }
     const {foundStart: cursorPosition} = this.getCaretPositionInText();
     this.socket.emit("cursor_update", {"client_id": this.clientId, "cursor_position": cursorPosition, "doc_uuid": this.doc_uuid});
     this.syncScroll(['attached']);
@@ -496,10 +494,6 @@ export class EditorComponent implements OnInit, OnDestroy {
       foundStart = tmp;
     }
 
-
-    console.log("Selections :", this.editorRef.getSelections())
-    console.log("Found start : ", foundStart);
-    console.log("Found end : ", foundEnd);
     return {
       foundStart,
       foundEnd
@@ -507,9 +501,10 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
 
   formatToken(event: Event, format_char: string) {
+    if(this.readOnly) {
+      return;
+    }
     let {foundStart, foundEnd} = this.getCaretPositionInText();
-    console.log(`Found start : ${foundStart}`);
-    console.log(`Found end : ${foundEnd}`);
     foundStart -= 1;
     foundEnd -= 1;
     this.setMonacoCode(this.monacoCode.substring(0, foundStart) +
@@ -521,9 +516,10 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
 
   formatLink(_: Event) {
+    if(this.readOnly) {
+      return;
+    }
     let {foundStart, foundEnd} = this.getCaretPositionInText();
-    //foundStart -= 1;
-    //foundEnd -= 1;
 
     if(foundStart == foundEnd) {
       this.setMonacoCode(this.monacoCode.substring(0, foundStart) +
@@ -545,6 +541,9 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
 
   formatImageLink(_: Event) {
+    if(this.readOnly) {
+      return;
+    }
     let {foundStart, foundEnd} = this.getCaretPositionInText();
     if(foundStart == foundEnd) {
       this.setMonacoCode(this.monacoCode.substring(0, foundStart) +
@@ -563,6 +562,9 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
 
   formatTable(_: Event) {
+    if(this.readOnly) {
+      return;
+    }
     let {foundStart} = this.getCaretPositionInText();
     let newTable = "[cols=\"1,1\"]\n" +
         "|===\n" +
@@ -581,10 +583,16 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
 
   sendImage(_: Event) {
+    if(this.readOnly) {
+      return;
+    }
     this.imageInputElement.nativeElement.click();
   }
 
   onImageSelected(event: any) {
+    if(this.readOnly) {
+      return;
+    }
     console.log("Selected");
     const file: File = event.target.files[0];
     const reader = new FileReader();
@@ -599,8 +607,6 @@ export class EditorComponent implements OnInit, OnDestroy {
         console.warn("Invalid image URL callback received");
         return;
       }
-      //const textArea = this.getTextArea();
-      //let foundStart = textArea?.selectionStart!;
       let { foundStart } = this.getCaretPositionInText();
       while(this.monacoCode.at(foundStart) != '\n' && foundStart < this.monacoCode.length) {
         foundStart += 1;
@@ -618,7 +624,6 @@ export class EditorComponent implements OnInit, OnDestroy {
   setDocumentName() {
     const dialogRef = this.dialog.open(DialogSetNameComponent, {
       width: '250px',
-      //data: {"doc_name": this.documentInfos.doc_name}
       data: {"doc_name": this.documentService.documentInfos.doc_name}
     });
     dialogRef.afterClosed().subscribe((result) => {
@@ -629,6 +634,4 @@ export class EditorComponent implements OnInit, OnDestroy {
       }
     })
   }
-
-
 }
