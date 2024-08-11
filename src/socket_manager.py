@@ -36,7 +36,6 @@ class SocketManager (Namespace):
         self.auth_manager.check_oauth_status()
 
     def on_disconnect(self):
-        print("On disconnect called")
         doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
         if doc_uuid:
             self.on_leave_room(doc_uuid)
@@ -48,7 +47,7 @@ class SocketManager (Namespace):
         if self.db_manager.get_document(doc_uuid, u_info.user_unique_identifier) is not None:
             emit("join_room", "OK")
 
-            print(f"User join room '{doc_uuid}'")
+            self.logger.info(f"User '{u_info.username}' join room '{doc_uuid}'")
 
             self.rooms_manager.add_user_to_room(doc_uuid, u_info)
 
@@ -84,7 +83,7 @@ class SocketManager (Namespace):
             doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
             update_id = data["update_id"]
             if update_id < self.rooms_manager.get_update_id(doc_uuid):
-                print("update_id older than our")
+                self.logger.debug("update_id older than our")
                 return
             with open(os.path.join(self.document_manager.get_document_folder(doc_uuid), doc_uuid + ".adoc"),
                       'w') as f:  # Create the file
@@ -102,7 +101,7 @@ class SocketManager (Namespace):
             if data.get("client_id") is not None and data.get("cursor_position") is not None:
                 self.socketio.emit("client_cursor_update", data, to=doc_uuid)
             else:
-                print(f"Invalid cursor pos received : {data}")
+                self.logger.debug(f"Invalid cursor pos received : {data}")
         return _()
 
     def on_send_image(self, data):
@@ -115,7 +114,7 @@ class SocketManager (Namespace):
             else:
                 u_uid = 0
             if not self.db_manager.get_document(doc_uuid, u_uid):
-                print("User tried to push image with invalid doc uuid or u_uid")
+                self.logger.info("User tried to push image with invalid doc uuid or u_uid")
                 emit("Unable to retrieve the document with your permissions")
                 return
             self.logger.info("Received image")
@@ -201,7 +200,6 @@ class SocketManager (Namespace):
             else:
                 u_uid = 0
             doc = self.db_manager.get_document(doc_uuid, u_uid)
-            print(doc_uuid)
             with open(os.path.join(self.document_manager.get_document_folder(doc_uuid), doc_uuid + ".adoc"), 'r') as f:
                 content = f.read()
 

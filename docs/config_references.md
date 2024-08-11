@@ -16,5 +16,6 @@ All config keys correspond to the environment variable name.
 | GITHUB_ACCESS_TOKEN_URL    | *        |                     |                                                                                                   |
 | WASCII_RUBY_FOLDER         | *        |                     | If Ruby is not in path, should'nt be necessary                                                    |
 | WASCII_DEBUG               |          |                     |                                                                                                   |
-| WASCII_ASCIIDOCTOR_EXEC    | *        | asciidoc            | If AsciiDoctor tool is not in your path                                                           |
+| WASCII_ASCIIDOCTOR_EXEC    | *        | asciidoc            | If AsciiDoctor tool is not in your path (Docker image set this option)                            |
 | WASCII_LOG_LEVEL           |          | Info                | From 1(debug) to 5(critical)                                                                      |
+| ENABLE_REQUEST_LOGGING     |          | true                | Enable or disable request information                                                             |
