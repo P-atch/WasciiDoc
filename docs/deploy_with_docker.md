@@ -63,3 +63,9 @@ volumes:
 - This simple config allows to put persistent data in the Docker volume `data`.
 - Disable Github OAuth to disable authentication (not recommended), or set another authentication method.
 - This config does not allows to enable SSL, you will have modify it and add an Apache/Nginx reverse proxy, or add an external reverse proxy
+=======
+
+## About SSL
+
+SSL is currently not supported by AsciiDoc, we prefer to use a 
+reverse proxy, which is simple to expose and configure for SSL.
