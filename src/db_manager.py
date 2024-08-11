@@ -1,5 +1,5 @@
 import sqlite3
-from document_restriction import DocumentRestriction
+from src.objects.document_restriction import DocumentRestriction
 import logging
 from pathlib import Path
 from uuid import uuid4
@@ -27,8 +27,8 @@ class DbManager:
         db, cursor = self.open_db()
         self.logger.info(f"Listing documents for user {user_uuid}")
         try:
-            restriction_filter = DocumentRestriction.LOCKED
-            if user_uuid is None:
+            restriction_filter = DocumentRestriction.PRIVATE
+            if user_uuid is None or user_uuid == 0:
                 restriction_filter = DocumentRestriction.PROTECTED
             cursor.execute(
                 "SELECT document_uuid, document_name, documents.user_uuid, restriction, known_name FROM documents "

@@ -17,7 +17,7 @@
     <!--<p>{{this.documentInfos.doc_name}}</p>-->
     <span>{{this.documentService.documentInfos.doc_name}}</span>
     <span class="little-spacer"></span>
-    <button mat-button value="view" (click)="setDocumentName()">
+    <button mat-button value="view" (click)="setDocumentName()" *ngIf="!readOnly">
       <mat-icon aria-hidden="false" aria-label="Read view" fontIcon="edit"></mat-icon>
     </button>
     <span class="little-spacer"></span>
@@ -52,8 +52,8 @@
         <mat-list>
             <div *ngFor="let client_id of connectedUsers.keys()">
                 <div style="display: flex;align-content: center;align-items: center;justify-content: center">
-                    <div style="width: 10px; height: 20px;" [style.background-color]="client_cursors_colors.get(client_id)"></div>
-                    <mat-card-content >{{ connectedUsers.get(client_id)?.username }}</mat-card-content>
+                    <div style="width: 10px; height: 20px;" [style.background-color]="connectedUsers.get(client_id)!.cursor.color"></div>
+                    <mat-card-content >{{ connectedUsers.get(client_id)!.user.username }}</mat-card-content>
                 </div>
                 <mat-divider></mat-divider>
             </div>
@@ -84,7 +84,7 @@
     </div>-->
 
         <div class="editor_toolbar_container">
-            <mat-toolbar class="editor_toolbar" *ngIf="!editor_hidden">
+            <mat-toolbar class="editor_toolbar" *ngIf="!editor_hidden&&!readOnly">
                 <button mat-mini-fab aria-label="Format bold" (click)="formatToken($event, '**')">
                     <mat-icon>format_bold</mat-icon>
                 </button>

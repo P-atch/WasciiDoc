@@ -18,8 +18,8 @@ export interface ServerSuccess {
 
 export interface ServerError {
   error: string;
-  level: string;
-  requiredAction: string;
+  level: string|undefined;
+  requiredAction: string|undefined;
 }
 
 export interface DbUser {

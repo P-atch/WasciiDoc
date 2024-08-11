@@ -7,7 +7,7 @@ import {SocketioService} from "../app/socketio/socketio.service";
 export class AuthService implements OnInit{
   authMethods: string[] = [];
   private authMethodsFetched = false;
-  userInfos: {"username": string, "profile_image_url": string|undefined} | null = null;
+  userInfos: {"username": string, "profile_image_url": string|undefined, "user_unique_identifier": number} | null = null;
   private userInfosFetched = false;
   constructor(private socket: SocketioService) {
     this.getAuthMethods();

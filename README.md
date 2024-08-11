@@ -1,6 +1,6 @@
 # WasciiDoc
 
-[![Docker Image CI](https://github.com/Ptchw0rk/WasciiDoc/actions/workflows/docker-image.yml/badge.svg)](https://github.com/Ptchw0rk/WasciiDoc/actions/workflows/docker-image.yml)
+[![Docker Image CI](https://github.com/Ptchw0rk/WasciiDoc/actions/workflows/build-docker-image.yml/badge.svg)](https://github.com/Ptchw0rk/WasciiDoc/actions/workflows/build-docker-image.yml)
 
 ![Logo](docs/icon_256.png)
 
@@ -10,7 +10,7 @@ inspired by the great project [Hedgedoc](https://github.com/hedgedoc/hedgedoc).
 ## Getting started
 
 - Try out a [demo instance]() to get discover the project
-- You can [setup your own instance using Docker](docs/deploy_with_docker.md)
+- Then [setup your own instance using Docker](docs/deploy_with_docker.md)
 
 ## Project status
 
