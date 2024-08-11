@@ -26,7 +26,7 @@ class RoomsManager:
                         self.logger.info(f"Room {doc_uuid} : Removing as it is empty")
                         rooms_to_delete.append(doc_uuid)
                 room_users_json = self.get_room_users(doc_uuid, to_json=True)
-                self.socketio.emit("room_users", room_users_json)
+                self.socketio.emit("room_users", room_users_json, to=doc_uuid)
             for doc_uuid in rooms_to_delete:
                 self._rooms.pop(doc_uuid)
             time.sleep(60)
@@ -34,8 +34,8 @@ class RoomsManager:
     def __init__(self, socketio, document_manager: DocumentManager):
         self.document_manager = document_manager
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Starting rooms cleaner thread")
         self.socketio = socketio
+        # self.logger.info("Starting rooms cleaner thread")
         #thread = threading.Thread(target=self.cleaner_thread, daemon=True) # Not necessary
         #thread.start()
 

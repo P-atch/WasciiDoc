@@ -11,3 +11,4 @@ data
 workdir
 .env
 src/browser
+workfile

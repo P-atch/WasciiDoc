@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, redirect, url_for, make_response, session, abort, send_file
+from flask import Flask, render_template, redirect, url_for, make_response, session, abort, send_file, Response, request
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_socketio import SocketIO
 from dotenv import dotenv_values, load_dotenv
 from converter import Converter
@@ -13,16 +14,21 @@ from socket_manager import SocketManager
 
 load_dotenv(".env")
 
-for mandatory in ["WASCII_ASCIIDOCTOR_EXEC", "DATA_FOLDER"]:
+for mandatory in ["DATA_FOLDER"]:
     if not os.environ.get(mandatory):
         raise EnvironmentError(f"Missing mandatory environment key '{mandatory}'")
 
+logging.basicConfig(level=os.environ.get("WASCII_LOG_LEVEL", "INFO"))
+logger = logging.getLogger()
+request_logger = logging.getLogger("app_req")
+request_logger.disabled = str(os.environ.get("ENABLE_REQUEST_LOGGING")).lower() == 'true'
+
 if os.environ.get("WASCII_DEBUG"):
-    print("Loading DEBUG config")
+    logger.info("Loading DEBUG config")
     template_folder = "../angular/dist/wascii-doc/browser/"
     static_folder = "../angular/dist/wascii-doc/browser/"
 else:
-    print("Loading production config")
+    logger.info("Loading production config")
     template_folder = "browser"
     static_folder = "browser"
 data_folder = os.environ["DATA_FOLDER"]
@@ -36,13 +42,12 @@ for e in [data_folder, tmp_folder]:
         raise FileNotFoundError(e)
 os.environ["PATH"] = os.environ["PATH"] + f";{os.environ.get('WASCII_RUBY_FOLDER')}"
 
-logging.basicConfig(level=os.environ.get("WASCII_LOG_LEVEL", "INFO"))
+
 app = Flask(__name__, template_folder=template_folder, static_folder=static_folder, static_url_path="/")
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 app.config["SECRET_KEY"] = "secret!"
 socketio = SocketIO(app)
-converter = Converter(tmp_folder, os.environ["WASCII_ASCIIDOCTOR_EXEC"])
-
-
+converter = Converter(tmp_folder, os.environ.get("WASCII_ASCIIDOCTOR_EXEC", "asciidoctor"))
 
 
 db_manager = DbManager(data_folder + "/" + "db.sqlite")
@@ -52,9 +57,15 @@ rooms_manager = RoomsManager(socketio, document_manager)
 #socket_manager = SocketManager(socketio, auth_manager, db_manager)
 
 uuid_re = r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"
-logger = logging.getLogger()
 socketio.on_namespace(SocketManager(socketio, auth_manager, db_manager,
                                     converter, document_manager, rooms_manager, data_folder))
+
+
+@app.after_request
+def after_request_func(response: Response):
+    request_logger.info(f"{request.remote_addr} : {request.path} {response.content_length}B {response.status}")
+    return response
+
 
 @app.route("/")
 @auth_manager.check_oauth
@@ -78,10 +89,10 @@ def root2(doc_uuid):
 @auth_manager.check_oauth
 def get_static_file(doc_uuid, filename):
     if not re.fullmatch(uuid_re, doc_uuid):
-        print(f"Request for static resource on invalid doc uuid : {doc_uuid}")
+        logger.info(f"Request for static resource on invalid doc uuid : {doc_uuid}")
         abort(404)
     if not re.fullmatch(r"[A-z0-9]+\.[A-z]+", filename):
-        print(f"Request for static resource on invalid filename : {filename}")
+        logger.info(f"Request for static resource on invalid filename : {filename}")
         abort(404)
     return send_file(os.path.join(document_manager.get_document_folder(doc_uuid), filename))
 
@@ -109,7 +120,7 @@ def gitlab_oauth_callback():
     token = auth_manager.oauth.gitlab.authorize_access_token()
     session["token"] = token
     auth_manager.get_userinfos()
-    print(f"Session started : {session.get('user')}")
+    logger.info(f"Session started : {session.get('user')}")
     session["auth_method"] = "gitlab"
     return redirect(url_for("root"))
 
@@ -121,7 +132,7 @@ def github_oauth_callback():
     token = auth_manager.oauth.github.authorize_access_token()
     session["token"] = token
     auth_manager.get_userinfos()
-    print(f"Session started : {session.get('user')}")
+    logger.info(f"Session started : {session.get('user')}")
     session["auth_method"] = "github"
     return redirect(url_for("root"))
 
