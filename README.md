@@ -1,6 +1,6 @@
 # WasciiDoc
 
-[![Docker Image CI](https://github.com/Ptchw0rk/WasciiDoc/actions/workflows/docker-image.yml/badge.svg)](https://github.com/Ptchw0rk/WasciiDoc/actions/workflows/docker-image.yml)
+[![Docker Image CI](https://github.com/Ptchw0rk/WasciiDoc/actions/workflows/build-docker-image.yml/badge.svg)](https://github.com/Ptchw0rk/WasciiDoc/actions/workflows/build-docker-image.yml)
 
 ![Logo](docs/icon_256.png)
 
