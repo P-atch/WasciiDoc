@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, redirect, url_for, make_response, session, abort, send_file
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_socketio import SocketIO
 from dotenv import dotenv_values, load_dotenv
 from converter import Converter
@@ -38,6 +39,7 @@ os.environ["PATH"] = os.environ["PATH"] + f";{os.environ.get('WASCII_RUBY_FOLDER
 
 logging.basicConfig(level=os.environ.get("WASCII_LOG_LEVEL", "INFO"))
 app = Flask(__name__, template_folder=template_folder, static_folder=static_folder, static_url_path="/")
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 app.config["SECRET_KEY"] = "secret!"
 socketio = SocketIO(app)
 converter = Converter(tmp_folder, os.environ["WASCII_ASCIIDOCTOR_EXEC"])

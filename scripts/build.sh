@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
 RED="\e[31m"
 GREEN="\e[32m"
 RESET="\e[0m"
