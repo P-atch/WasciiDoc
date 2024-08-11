@@ -129,6 +129,11 @@ export class EditorComponent implements OnInit, OnDestroy {
       setTimeout(() => {this.setMonacoCode(newCode)}, 1000);
       return;
     }
+    if(this.editorRef.getModel() === undefined) {
+      console.warn("this.editorRef.getModel() is undefined, retrying in 1sec");
+      setTimeout(() => {this.setMonacoCode(newCode)}, 1000);
+      return;
+    }
     const bckpSelection = this.editorRef.getSelection();
 
     this.cursorsTimeOut = [];
