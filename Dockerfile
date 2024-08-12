@@ -1,7 +1,7 @@
 FROM debian:latest
 
 RUN apt update
-RUN apt -y install python3.11 asciidoctor python3-pip python3-setuptools vi
+RUN apt -y install python3.11 asciidoctor python3-pip python3-setuptools vim
 RUN mkdir /opt/wasciidoc/
 COPY *.md *.py *.txt LICENSE /opt/wasciidoc/
 COPY src /opt/wasciidoc/src
