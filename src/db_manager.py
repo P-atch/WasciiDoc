@@ -1,5 +1,5 @@
 import sqlite3
-from src.objects.document_restriction import DocumentRestriction
+from objects.document_restriction import DocumentRestriction
 import logging
 from pathlib import Path
 from uuid import uuid4

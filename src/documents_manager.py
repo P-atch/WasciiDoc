@@ -1,7 +1,7 @@
 import re
 import os
 from db_manager import DbManager
-from src.objects.document_restriction import DocumentRestriction
+from objects.document_restriction import DocumentRestriction
 
 uuid_re = r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"
 

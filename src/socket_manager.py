@@ -8,7 +8,7 @@ from flask_socketio.namespace import Namespace
 from converter import Converter
 from auth_manager import AuthManager, User
 from db_manager import DbManager
-from src.objects.document_restriction import DocumentRestriction
+from objects.document_restriction import DocumentRestriction
 from pathlib import Path
 from usefull import gen_random_filename
 import logging
