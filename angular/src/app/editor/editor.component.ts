@@ -5,7 +5,7 @@ import {DbUser, ServerError, SocketioService} from "../socketio/socketio.service
 import {ToolbarService} from "../toolbar/toolbar.service";
 import {NgxEditorModel} from "ngx-monaco-editor-v2";
 import {ActivatedRoute, Params, Router} from "@angular/router";
-import {DialogSetNameComponent} from "./dialog-set-name/dialog-set-name.component";
+import {DialogSetNameComponent} from "../dialog-set-name/dialog-set-name.component";
 import {MatDialog} from "@angular/material/dialog";
 import {fromEvent, Subscription} from "rxjs";
 import {MatSnackBar} from "@angular/material/snack-bar";

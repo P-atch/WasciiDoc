@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Router} from "@angular/router";
 import {MatIcon} from "@angular/material/icon";
 import {MatButton, MatFabButton} from "@angular/material/button";
@@ -23,6 +23,9 @@ import {LoaderService} from "../loader/loader.service";
 import {MatExpansionPanelTitle} from "@angular/material/expansion";
 import {MatTab, MatTabGroup} from "@angular/material/tabs";
 import {MatTooltip} from "@angular/material/tooltip";
+import {DialogSetNameComponent} from "../dialog-set-name/dialog-set-name.component";
+import {DocumentServiceService} from "../editor/document-service/document-service.service";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-main-page',
@@ -55,9 +58,11 @@ import {MatTooltip} from "@angular/material/tooltip";
 export class MainPageComponent implements OnInit, OnDestroy {
   listDocumentsSubscription: Subscription;
   documents: DbDocument[] = [];
+  readonly dialog = inject(MatDialog);
 
   @ViewChild('newDocumentTemplate', { static: true }) newDocumentTemplate!: TemplateRef<any>;
-  constructor(private router: Router, private toolbarService: ToolbarService, protected auth: AuthService, private socket: SocketioService, private loadingService: LoaderService) {}
+  constructor(private router: Router, private toolbarService: ToolbarService,
+              protected auth: AuthService, private socket: SocketioService, private loadingService: LoaderService) {}
 
 
 
@@ -103,4 +108,22 @@ export class MainPageComponent implements OnInit, OnDestroy {
       this.socket.emit("delete_document", {"document": {"doc_uuid": doc_uuid}});
 
     }
+
+    renameDocument(doc_uuid: string, current_name: string) {
+        const dialogRef = this.dialog.open(DialogSetNameComponent, {
+          width: '250px',
+          data: {"doc_name": current_name}
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if(!result) {
+                return;
+            }
+            //this.loadingService.increaseLoading();
+            this.socket.once("set_document_name", () => {
+                this.socket.listDocuments();
+            });
+            this.socket.emit("set_document_name", {"document": {"doc_name": result, "doc_uuid": doc_uuid}});
+        });
+    }
+
 }

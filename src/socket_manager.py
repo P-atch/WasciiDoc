@@ -12,6 +12,9 @@ from objects.document_restriction import DocumentRestriction
 from pathlib import Path
 from usefull import gen_random_filename
 import logging
+from rooms_manager import RoomsManager
+from documents_manager import DocumentManager
+
 
 
 class SocketManager (Namespace):
@@ -21,7 +24,7 @@ class SocketManager (Namespace):
     db_manager: DbManager
     converter: Converter
 
-    def __init__(self, socketio: SocketIO, auth_manager: AuthManager, db_manager: DbManager, converter: Converter, document_manager, rooms_manager, data_folder):
+    def __init__(self, socketio: SocketIO, auth_manager: AuthManager, db_manager: DbManager, converter: Converter, document_manager: DocumentManager, rooms_manager: RoomsManager, data_folder: str):
         self.socketio = socketio
         self.auth_manager = auth_manager
         self.db_manager = db_manager
@@ -148,10 +151,10 @@ class SocketManager (Namespace):
         return _()
 
     def on_set_document_name(self, data):
-        @self.rooms_manager.require_editing_room
-        @self.rooms_manager.require_write_permission
         def _():
             doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
+            if doc_uuid is None:
+                doc_uuid = data["document"]["doc_uuid"]
             u_info = self.auth_manager.get_userinfos()
             if u_info is not None:
                 u_uid = u_info.user_unique_identifier
@@ -161,11 +164,17 @@ class SocketManager (Namespace):
             document = self.db_manager.get_document(doc_uuid, u_uid)
             if document is None:
                 self.logger.error(f"Error setting document name : Document '{doc_uuid}' not found in DB for uuid '{u_uid}'")
+                emit("display_error", {"error": "This document was not found for your uuid"})
                 return
             self.logger.info(f"Changing document {doc_uuid} name : {document.doc_name} -> {new_name}")
             document.doc_name = new_name
+            if not self.document_manager.can_user_write_document(doc_uuid, u_uid):
+                emit("display_error", {"error": "You are not able to set name for this document"})
+                return
             self.db_manager.set_document(document)
-            self.socketio.emit("update_document", {"document": self.db_manager.get_document(doc_uuid, u_uid).json()}, to=doc_uuid)
+            new_doc = self.db_manager.get_document(doc_uuid, u_uid).json()
+            self.socketio.emit("update_document", {"document": new_doc}, to=doc_uuid)
+            emit("set_document_name", {"document": new_doc})
         return _()
 
     def on_set_document_restriction(self, data):
