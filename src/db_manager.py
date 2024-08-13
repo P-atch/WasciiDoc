@@ -49,7 +49,7 @@ class DbManager:
             restriction_filter = DocumentRestriction.LOCKED
             if user_uuid is None:
                 restriction_filter = DocumentRestriction.PROTECTED
-            self.logger.info(
+            self.logger.debug(
                 f"Searching document '{doc_uuid}' for user {user_uuid} with minimum permission '{restriction_filter}'")
             cursor.execute(
                 "SELECT document_uuid, document_name, documents.user_uuid, restriction, known_name FROM documents "

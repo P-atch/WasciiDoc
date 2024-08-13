@@ -7,12 +7,12 @@ uuid_re = r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"
 
 
 class DocumentManager:
-    def __init__(self, tmp_folder, db_manager: DbManager):
-        self.tmp_folder = tmp_folder
+    def __init__(self, document_folder, db_manager: DbManager):
+        self.document_folder = document_folder
         self.db_manager = db_manager
 
     def get_document_folder(self, doc_uuid):
-        return os.path.join(self.tmp_folder, doc_uuid)
+        return os.path.join(self.document_folder, doc_uuid)
 
     def get_user_current_doc_uuid(self, _rooms: list[str]):
         for room in _rooms:
@@ -30,3 +30,6 @@ class DocumentManager:
         if doc.restriction >= DocumentRestriction.LIMITED and u_uuid != 0 and u_uuid is not None:
             return True
         return False
+
+    def get_document_filename(self, doc_uuid):
+        return os.path.join(str(self.get_document_folder(doc_uuid)), doc_uuid + ".adoc")

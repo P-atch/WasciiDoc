@@ -89,7 +89,7 @@ class SocketManager (Namespace):
             if update_id < self.rooms_manager.get_update_id(doc_uuid):
                 self.logger.debug("update_id older than our")
                 return
-            with open(os.path.join(self.document_manager.get_document_folder(doc_uuid), doc_uuid + ".adoc"),
+            with open(self.document_manager.get_document_filename(doc_uuid),
                       'w') as f:  # Create the file
                 f.write(data["content"])
             self.rooms_manager.increase_update_id(doc_uuid)
@@ -201,6 +201,27 @@ class SocketManager (Namespace):
                 document.restriction = new_restriction
                 self.db_manager.set_document(document)
             self.socketio.emit("update_document", {"document": self.db_manager.get_document(doc_uuid, u_uid).json()}, to=doc_uuid)
+        return _()
+
+    def on_download_document(self, data):
+        @self.rooms_manager.require_editing_room
+        def _():
+            doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
+            _format = str(data.get("format"))
+            self.logger.info(f"User downloading file {doc_uuid} as {_format}")
+            if _format not in ["html", "pdf"]:
+                emit("display_error", {"error": f"Invalid format '{format}'"})
+                self.logger.error(f"Invalid download format '{format}'")
+                return
+            with open(self.document_manager.get_document_filename(doc_uuid), 'r') as f:
+                adoc_data = f.read()
+            converted_filename = self.converter.get_doc_as(adoc_data, _format)
+            with open(converted_filename, 'rb') as f:
+                converted_data = f.read()
+
+            #ret = base64.b64encode(converted_data)
+            ret = converted_data
+            emit("download_document", ret)
         return _()
 
     # Initial getting of document

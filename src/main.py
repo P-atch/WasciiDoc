@@ -32,8 +32,11 @@ else:
     template_folder = "browser"
     static_folder = "browser"
 data_folder = os.environ["DATA_FOLDER"]
-tmp_folder = os.path.join(data_folder, "documents")
-for e in [data_folder, tmp_folder]:
+documents_folder = os.path.join(data_folder, "documents")
+tmp_folder = os.path.join(data_folder, "tmp")
+logger.info(f"Document folder : {documents_folder}")
+logger.info(f"Temp folder : {tmp_folder}")
+for e in [documents_folder, tmp_folder]:
     try:
         os.mkdir(e)
     except FileExistsError:
@@ -50,15 +53,15 @@ socketio = SocketIO(app)
 converter = Converter(tmp_folder, os.environ.get("WASCII_ASCIIDOCTOR_EXEC", "asciidoctor"))
 
 
-db_manager = DbManager(data_folder + "/" + "db.sqlite")
+db_manager = DbManager(documents_folder + "/" + "db.sqlite")
 auth_manager = AuthManager(app, os.environ, db_manager)
-document_manager = DocumentManager(tmp_folder, db_manager)
+document_manager = DocumentManager(documents_folder, db_manager)
 rooms_manager = RoomsManager(socketio, document_manager)
 #socket_manager = SocketManager(socketio, auth_manager, db_manager)
 
 uuid_re = r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"
 socketio.on_namespace(SocketManager(socketio, auth_manager, db_manager,
-                                    converter, document_manager, rooms_manager, data_folder))
+                                    converter, document_manager, rooms_manager, documents_folder))
 
 
 @app.after_request
