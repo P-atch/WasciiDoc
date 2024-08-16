@@ -15,10 +15,11 @@ inspired by the great project [Hedgedoc](https://github.com/hedgedoc/hedgedoc).
 
 ## Features
 
-- Collaborative editing
-- Permissions by document
-- PDF / HTML export
-- OAuth (Gitlab / Github)
+- Collaborative editing 🃏 
+- Permissions by document 🔒
+- PDF / HTML export 🌿
+- OAuth (Gitlab / Github) 🦣
+- Dark / light theme 🌙
 - On reflexion : 
   - Folder management
   - Multi-owner documents
