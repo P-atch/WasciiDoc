@@ -637,7 +637,6 @@ export class EditorComponent implements OnInit, OnDestroy {
       }
     })
   }
-
   download(format: string) {
     this.loadingService.increaseLoading();
     this.socket.once("download_document", (data: any) => {
