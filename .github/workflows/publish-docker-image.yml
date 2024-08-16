@@ -4,6 +4,10 @@ on:
   push:
     branches: [ "development", "main" ]
 
+env:
+  REGISTRY: "860000"
+  IMAGE_NAME: "wasciidoc"
+
 jobs:
 
   build:
