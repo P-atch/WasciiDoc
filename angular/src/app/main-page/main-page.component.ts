@@ -26,6 +26,7 @@ import {MatTooltip} from "@angular/material/tooltip";
 import {DialogSetNameComponent} from "../dialog-set-name/dialog-set-name.component";
 import {DocumentServiceService} from "../editor/document-service/document-service.service";
 import {MatDialog} from "@angular/material/dialog";
+import {DialogConfirmDeletionComponent} from "./confirm-deletion/dialog-confirm-deletion.component";
 
 @Component({
   selector: 'app-main-page',
@@ -98,16 +99,23 @@ export class MainPageComponent implements OnInit, OnDestroy {
 
   }
 
-    deleteDocument(doc_uuid: string) {
-      this.loadingService.increaseLoading();
-      this.socket.once("delete_document", () => {
-          console.log("Document delete callback received");
-          this.loadingService.decreaseLoading();
-          this.socket.listDocuments();
-      })
-
-      this.socket.emit("delete_document", {"document": {"doc_uuid": doc_uuid}});
-
+    deleteDocument(doc_uuid: string, doc_name: string) {
+      const dialogRef = this.dialog.open(DialogConfirmDeletionComponent, {
+          width: '250px',
+          data: {"doc_name": doc_name}
+      });
+      dialogRef.afterClosed().subscribe(result => {
+          if(!result) {
+              return;
+          }
+          this.loadingService.increaseLoading();
+          this.socket.once("delete_document", () => {
+              console.log("Document delete callback received");
+              this.loadingService.decreaseLoading();
+              this.socket.listDocuments();
+          })
+          this.socket.emit("delete_document", {"document": {"doc_uuid": doc_uuid}});
+      });
     }
 
     renameDocument(doc_uuid: string, current_name: string) {
