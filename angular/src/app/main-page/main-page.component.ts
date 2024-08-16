@@ -21,7 +21,7 @@ import {MatGridList, MatGridTile} from "@angular/material/grid-list";
 import {Subscription} from "rxjs";
 import {LoaderService} from "../loader/loader.service";
 import {MatExpansionPanelTitle} from "@angular/material/expansion";
-import {MatTab, MatTabGroup} from "@angular/material/tabs";
+import {MatTab, MatTabChangeEvent, MatTabGroup} from "@angular/material/tabs";
 import {MatTooltip} from "@angular/material/tooltip";
 import {DialogSetNameComponent} from "../dialog-set-name/dialog-set-name.component";
 import {DocumentServiceService} from "../editor/document-service/document-service.service";
@@ -59,6 +59,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
   listDocumentsSubscription: Subscription;
   documents: DbDocument[] = [];
   readonly dialog = inject(MatDialog);
+  protected selectedTab: number = +(localStorage.getItem("mainComponentSelectedTab") || "0");
 
   @ViewChild('newDocumentTemplate', { static: true }) newDocumentTemplate!: TemplateRef<any>;
   constructor(private router: Router, private toolbarService: ToolbarService,
@@ -126,4 +127,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
         });
     }
 
+    changeTab(tab: number) {
+      localStorage.setItem("mainComponentSelectedTab", tab.toString());
+    }
 }

@@ -5,7 +5,7 @@
     <span class="little-spacer"></span>
 </ng-template>
 
-<mat-tab-group animationDuration="300ms" style="height: 100vh;" >
+<mat-tab-group animationDuration="300ms" style="height: 100vh;" (focusChange)="changeTab($event.index)" [(selectedIndex)]="selectedTab" >
     <mat-tab label="Welcome">
         <div class="welcome-tab">
             <img ngSrc="/icon_256.png" alt="logo"  width="256" height="256">
