@@ -18,6 +18,15 @@ for mandatory in ["DATA_FOLDER"]:
     if not os.environ.get(mandatory):
         raise EnvironmentError(f"Missing mandatory environment key '{mandatory}'")
 
+if str(os.environ.get("ENABLE_GITLAB_OAUTH")).lower() == "true":
+    for required_gitlab_key in ["GITLAB_CLIENT_ID", "GITLAB_CLIENT_SECRET", "GITLAB_SERVER_METADATA_URL"]:
+        if not os.environ.get(required_gitlab_key):
+            raise EnvironmentError(f"GITLAB OAUTH : Missing mandatory environment key '{required_gitlab_key}'")
+if str(os.environ.get("ENABLE_GITHUB_OAUTH")).lower() == "true":
+    for required_gitlab_key in ["GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET", "GITHUB_AUTHORIZE_URL", "GITHUB_ACCESS_TOKEN_URL"]:
+        if not os.environ.get(required_gitlab_key):
+            raise EnvironmentError(f"GITHUB OAUTH : Missing mandatory environment key '{required_gitlab_key}'")
+
 logging.basicConfig(level=os.environ.get("WASCII_LOG_LEVEL", "INFO"))
 logger = logging.getLogger()
 request_logger = logging.getLogger("app_req")
