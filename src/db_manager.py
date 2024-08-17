@@ -23,17 +23,19 @@ class DbManager:
         db = sqlite3.connect(self.db_path)
         return db, db.cursor()
 
-    def list_documents(self, user_uuid: str) -> [DbDocument]:
+    def list_documents(self, user_uuid: int) -> [DbDocument]:
         db, cursor = self.open_db()
         self.logger.info(f"Listing documents for user {user_uuid}")
         try:
             restriction_filter = DocumentRestriction.PRIVATE
             if user_uuid is None or user_uuid == 0:
                 restriction_filter = DocumentRestriction.PROTECTED
+            if user_uuid == -1: # Admin
+                restriction_filter = DocumentRestriction.PRIVATE
             cursor.execute(
                 "SELECT document_uuid, document_name, documents.user_uuid, restriction, known_name FROM documents "
                 "JOIN known_users ON known_users.user_uuid=documents.user_uuid "
-                "WHERE (documents.user_uuid=?) OR restriction>?",
+                "WHERE (documents.user_uuid=?) OR restriction>? AND temporary=FALSE",
                 (user_uuid, restriction_filter))
             res = cursor.fetchall()
             ret = []
@@ -43,12 +45,14 @@ class DbManager:
         finally:
             db.close()
 
-    def get_document(self, doc_uuid: str, user_uuid: str):
+    def get_document(self, doc_uuid: str, user_uuid: int):
         db, cursor = self.open_db()
         try:
             restriction_filter = DocumentRestriction.LOCKED
             if user_uuid is None:
                 restriction_filter = DocumentRestriction.PROTECTED
+            if user_uuid == -1:
+                restriction_filter = DocumentRestriction.PRIVATE    # ADMIN
             self.logger.debug(
                 f"Searching document '{doc_uuid}' for user {user_uuid} with minimum permission '{restriction_filter}'")
             cursor.execute(
@@ -64,15 +68,15 @@ class DbManager:
         finally:
             db.close()
 
-    def create_document(self, document_name: str, owner_uuid: str,
-                        restriction: int | DocumentRestriction) -> DbDocument:
+    def create_document(self, document_name: str, owner_uuid: int,
+                        restriction: int | DocumentRestriction, temporary=False) -> DbDocument:
         db, cursor = self.open_db()
         self.logger.info("Creating document")
         try:
             doc_uuid = str(uuid4())
             cursor.execute(
-                "INSERT INTO documents (document_uuid, document_name, user_uuid, restriction) VALUES (?, ?, ?, ?)",
-                (doc_uuid, document_name, owner_uuid, restriction))
+                "INSERT INTO documents (document_uuid, document_name, user_uuid, restriction, temporary) VALUES (?, ?, ?, ?, ?)",
+                (doc_uuid, document_name, owner_uuid, restriction, temporary))
             db.commit()
             return DbDocument(doc_uuid, document_name, owner_uuid, restriction, self.get_user_name(owner_uuid))
         finally:

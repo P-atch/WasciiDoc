@@ -11,6 +11,7 @@ from rooms_manager import RoomsManager
 from documents_manager import DocumentManager
 import logging
 from socket_manager import SocketManager
+from objects.app_config import AppConfig
 
 load_dotenv(".env")
 
@@ -26,6 +27,13 @@ if str(os.environ.get("ENABLE_GITHUB_OAUTH")).lower() == "true":
     for required_gitlab_key in ["GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET", "GITHUB_AUTHORIZE_URL", "GITHUB_ACCESS_TOKEN_URL"]:
         if not os.environ.get(required_gitlab_key):
             raise EnvironmentError(f"GITHUB OAUTH : Missing mandatory environment key '{required_gitlab_key}'")
+
+app_config = AppConfig(
+    allow_anonymous_edit=os.environ.get("WASCII_ALLOW_ANONYMOUS_EDIT", default="true").lower() == "true",
+    allow_anonymous_creation=os.environ.get("WASCII_ALLOW_ANONYMOUS_CREATION", default="true").lower() == "true",
+    debug=os.environ.get("WASCII_ALLOW_ANONYMOUS_CREATION", default="false").lower() == "true",
+    default_doc_permission=int(os.environ.get("WASCII_DEFAULT_DOCUMENT_PERMISSION", default="4")),
+)
 
 logging.basicConfig(level=os.environ.get("WASCII_LOG_LEVEL", "INFO"))
 logger = logging.getLogger()
@@ -62,15 +70,15 @@ socketio = SocketIO(app)
 converter = Converter(tmp_folder, os.environ.get("WASCII_ASCIIDOCTOR_EXEC", "asciidoctor"))
 
 
-db_manager = DbManager(documents_folder + "/" + "db.sqlite")
+db_manager = DbManager(data_folder + "/" + "db.sqlite")
 auth_manager = AuthManager(app, os.environ, db_manager)
 document_manager = DocumentManager(documents_folder, db_manager)
-rooms_manager = RoomsManager(socketio, document_manager)
+rooms_manager = RoomsManager(socketio, document_manager, app_config, auth_manager)
 #socket_manager = SocketManager(socketio, auth_manager, db_manager)
 
 uuid_re = r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"
 socketio.on_namespace(SocketManager(socketio, auth_manager, db_manager,
-                                    converter, document_manager, rooms_manager, documents_folder))
+                                    converter, document_manager, rooms_manager, documents_folder, app_config=app_config))
 
 
 @app.after_request

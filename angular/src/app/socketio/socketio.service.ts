@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {Socket, SocketIoConfig} from "ngx-socket-io";
 import {Observable} from "rxjs";
+import {appConfig} from "../app.config";
 
 const config: SocketIoConfig = { url: window.origin, options: {} };
 
@@ -28,12 +29,27 @@ export interface DbUser {
   user_unique_identifier: string
 }
 
+export interface AppConfig {
+  allow_anonymous_edit: boolean,
+  allow_anonymous_creation: boolean,
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class SocketioService extends Socket {
+  app_config: AppConfig = {
+    allow_anonymous_edit: false,
+    allow_anonymous_creation: false
+  };
+
   constructor() {
     super(config)
+    this.on("get_app_config", (data: any) => {
+      this.app_config.allow_anonymous_edit = data["allow_anonymous_edit"];
+      this.app_config.allow_anonymous_creation = data["allow_anonymous_creation"];
+    });
+    this.emit("get_app_config")
   }
 
   listDocuments(): Observable<DbDocument[]> {
@@ -72,7 +88,7 @@ export class SocketioService extends Socket {
           level: data["level"],
           error: data["error"],
           requiredAction: data["required_action"]
-        }
+        };
         observer.next(err);
       });
       // Clean up lorsque l'observable est détruit
@@ -87,7 +103,7 @@ export class SocketioService extends Socket {
       this.on("display_success", (data: any) => {
         let succ: ServerSuccess = {
           message: data["message"]
-        }
+        };
         observer.next(succ);
       });
       // Clean up lorsque l'observable est détruit

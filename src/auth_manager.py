@@ -68,6 +68,13 @@ class AuthManager:
         else:
             return User("Invited", None, 0)
 
+    def get_current_u_uid(self) -> int:
+        u_info = self.get_userinfos()
+        if u_info is not None:
+            return u_info.user_unique_identifier
+        else:
+            return 0
+
     def check_oauth_status(self):
         #if (session.get("last_auth_check") and
         #        (datetime.now() - datetime.fromtimestamp(int(session.get("last_auth_check")))).seconds < 60):

@@ -35,6 +35,10 @@ export class DocumentServiceService implements OnInit {
   }
 
   isReadOnly() : boolean {
+    if(this.authService.userInfos?.user_unique_identifier == 0 || this.authService.userInfos?.user_unique_identifier == undefined) {
+      return true;
+    }
+
     if(this.documentInfos.restriction >= 4) {
       return false;
     }

@@ -1,5 +1,7 @@
 import re
 import os
+import shutil
+
 from db_manager import DbManager
 from objects.document_restriction import DocumentRestriction
 
@@ -10,6 +12,17 @@ class DocumentManager:
     def __init__(self, document_folder, db_manager: DbManager):
         self.document_folder = document_folder
         self.db_manager = db_manager
+        self.clean_no_db_documents()
+
+    def clean_no_db_documents(self):
+        """
+        Clean documents which are not in DB
+        """
+        list_docs = self.db_manager.list_documents(user_uuid=-1)
+        doc_uuids = [e.doc_uuid for e in list_docs]
+        for doc_uuid in os.listdir(self.document_folder):
+            if doc_uuid not in doc_uuids:
+                shutil.rmtree(os.path.join(self.document_folder, doc_uuid))
 
     def get_document_folder(self, doc_uuid):
         return os.path.join(self.document_folder, doc_uuid)
