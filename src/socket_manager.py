@@ -193,10 +193,7 @@ class SocketManager (Namespace):
         @self.rooms_manager.require_editing_room
         @self.rooms_manager.require_write_permission
         def _():
-            doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
-            u_uid = self.auth_manager.get_current_u_uid()
             new_restriction = data["document"]["restriction"]
-            document = self.db_manager.get_document(doc_uuid, u_uid)
             if document is None:
                 self.logger.error(
                     f"Error setting document restriction : Document '{doc_uuid}' not found in DB for uuid '{u_uid}'")
@@ -208,8 +205,15 @@ class SocketManager (Namespace):
                 self.logger.info(f"Changing document {doc_uuid} restriction : {document.restriction} -> {new_restriction}")
                 document.restriction = new_restriction
                 self.db_manager.set_document(document)
-            self.socketio.emit("update_document", {"document": self.db_manager.get_document(doc_uuid, u_uid).json()}, to=doc_uuid)
-        return _()
+
+        doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
+        u_uid = self.auth_manager.get_current_u_uid()
+        document = self.db_manager.get_document(doc_uuid, u_uid)
+        try:
+            return _()
+        finally:
+            self.socketio.emit("update_document", {"document": self.db_manager.get_document(doc_uuid, u_uid).json()},
+                               to=doc_uuid)
 
     def on_download_document(self, data):
         @self.rooms_manager.require_editing_room
