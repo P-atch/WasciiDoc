@@ -1,8 +1,7 @@
-name: Docker Image CI
+name: Build Docker Image
 
 on:
-  push:
-    branches: [ "development" ]
+  workflow_dispatch:
 
 jobs:
 

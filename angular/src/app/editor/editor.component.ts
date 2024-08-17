@@ -5,7 +5,7 @@ import {DbUser, ServerError, SocketioService} from "../socketio/socketio.service
 import {ToolbarService} from "../toolbar/toolbar.service";
 import {NgxEditorModel} from "ngx-monaco-editor-v2";
 import {ActivatedRoute, Params, Router} from "@angular/router";
-import {DialogSetNameComponent} from "./dialog-set-name/dialog-set-name.component";
+import {DialogSetNameComponent} from "../dialog-set-name/dialog-set-name.component";
 import {MatDialog} from "@angular/material/dialog";
 import {fromEvent, Subscription} from "rxjs";
 import {MatSnackBar} from "@angular/material/snack-bar";
@@ -88,6 +88,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 
   @ViewChild('editorSwitcherTemplate', { static: true }) editorSwitcherTemplateRef!: TemplateRef<any>;
   @ViewChild('otherUsersTemplate', { static: true }) otherUsersTemplateRef!: TemplateRef<any>;
+  @ViewChild('downloadAsTemplate', { static: true }) downloadAsTemplate!: TemplateRef<any>;
   @ViewChild('documentTitle', { static: true }) documentTitleRef!: TemplateRef<any>;
 
   readonly dialog = inject(MatDialog);
@@ -173,6 +174,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     })
     this.toolbarService.addElement(this.documentTitleRef);
     this.toolbarService.addElement(this.editorSwitcherTemplateRef);
+    this.toolbarService.addElement(this.downloadAsTemplate, 'right');
     this.toolbarService.addElement(this.otherUsersTemplateRef, 'right');
 
     this.socket.once("init_document_editor", (data: any) => {
@@ -321,6 +323,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     document.getElementById("editorSwitcher")!.style.visibility = "hidden";
     this.toolbarService.removeElement(this.editorSwitcherTemplateRef);
     this.toolbarService.removeElement(this.documentTitleRef);
+    this.toolbarService.removeElement(this.downloadAsTemplate, 'right');
     this.toolbarService.removeElement(this.otherUsersTemplateRef, 'right');
     for(let subscribtion of this.subscriptions) {
       subscribtion.unsubscribe();
@@ -633,5 +636,24 @@ export class EditorComponent implements OnInit, OnDestroy {
         this.socket.emit("set_document_name", {"document": this.documentService.documentInfos, "doc_uuid": this.doc_uuid});
       }
     })
+  }
+  download(format: string) {
+    this.loadingService.increaseLoading();
+    this.socket.once("download_document", (data: any) => {
+      this.loadingService.decreaseLoading();
+      console.log("Received converted document response");
+      let decoded = new Blob([data]);
+      let url = window.URL.createObjectURL(decoded);
+      let a = document.createElement('a');
+      document.body.append('a');
+      a.setAttribute('style', 'display: none');
+      a.href = url;
+      a.download = `${this.documentService.documentInfos.doc_name}.${format}`;
+      a.click()
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    });
+    this.socket.emit("download_document", {"format": format});
+
   }
 }
