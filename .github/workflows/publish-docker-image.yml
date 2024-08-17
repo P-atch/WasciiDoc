@@ -2,7 +2,7 @@ name: Publish Docker Image CI
 
 on:
   push:
-    branches: [ "development", "main" ]
+    branches: [ "development", "master" ]
 
 env:
   REGISTRY: "860000"
