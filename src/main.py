@@ -32,7 +32,7 @@ app_config = AppConfig(
     allow_anonymous_edit=os.environ.get("WASCII_ALLOW_ANONYMOUS_EDIT", default="true").lower() == "true",
     allow_anonymous_creation=os.environ.get("WASCII_ALLOW_ANONYMOUS_CREATION", default="true").lower() == "true",
     debug=os.environ.get("WASCII_ALLOW_ANONYMOUS_CREATION", default="false").lower() == "true",
-    default_doc_permission=int(os.environ.get("WASCII_DEFAULT_DOCUMENT_PERMISSION", default="4")),
+    default_doc_permission=int(os.environ.get("WASCII_DEFAULT_DOC_PERMISSION", default="4")),
 )
 
 logging.basicConfig(level=os.environ.get("WASCII_LOG_LEVEL", "INFO"))
