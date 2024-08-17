@@ -9,7 +9,7 @@ inspired by the great project [Hedgedoc](https://github.com/hedgedoc/hedgedoc).
 
 ## Getting started
 
-- Try out a [demo instance]() to get discover the project
+- Try out a [demo instance](https://app.wasciidoc.com/) to get discover the project
 - Then [setup your own instance using Docker](docs/deploy_with_docker.md)
 - To enable authentication, follow [this guide](docs/setup_oauth.md)
 
