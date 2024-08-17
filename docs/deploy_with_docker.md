@@ -4,7 +4,7 @@ A single port is exposed by WasciiDoc.
 
 Run the image :
 ```bash
-docker run -p 80:80 https://hub.docker.com/r/860000/wasciidoc/
+$ sudo docker run -p 80:80 860000/wasciidoc:main
 ```
 
 ## About SSL
