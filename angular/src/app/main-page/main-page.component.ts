@@ -64,7 +64,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
 
   @ViewChild('newDocumentTemplate', { static: true }) newDocumentTemplate!: TemplateRef<any>;
   constructor(private router: Router, private toolbarService: ToolbarService,
-              protected auth: AuthService, private socket: SocketioService, private loadingService: LoaderService) {}
+              protected auth: AuthService, protected socket: SocketioService, private loadingService: LoaderService) {}
 
 
 
@@ -137,5 +137,13 @@ export class MainPageComponent implements OnInit, OnDestroy {
 
     changeTab(tab: number) {
       localStorage.setItem("mainComponentSelectedTab", tab.toString());
+    }
+
+    canCreateDoc() {
+        return (!this.socket.app_config.allow_anonymous_creation || !this.socket.app_config.allow_anonymous_edit) && (this.auth.userInfos?.user_unique_identifier === 0 || this.auth.userInfos?.user_unique_identifier == undefined)
+    }
+
+    canEditDoc() {
+        return (!this.socket.app_config.allow_anonymous_edit) && (this.auth.userInfos?.user_unique_identifier === 0 || this.auth.userInfos?.user_unique_identifier == undefined)
     }
 }

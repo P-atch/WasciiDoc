@@ -8,6 +8,8 @@ from documents_manager import DocumentManager
 import logging
 from objects.room import Room
 import time
+from objects.app_config import AppConfig
+from auth_manager import AuthManager
 
 
 class RoomsManager:
@@ -31,10 +33,12 @@ class RoomsManager:
                 self._rooms.pop(doc_uuid)
             time.sleep(60)
 
-    def __init__(self, socketio, document_manager: DocumentManager):
+    def __init__(self, socketio, document_manager: DocumentManager, app_config: AppConfig, auth_manager: AuthManager):
         self.document_manager = document_manager
         self.logger = logging.getLogger(__name__)
         self.socketio = socketio
+        self.app_config = app_config
+        self.auth_manager = auth_manager
         # self.logger.info("Starting rooms cleaner thread")
         #thread = threading.Thread(target=self.cleaner_thread, daemon=True) # Not necessary
         #thread.start()
@@ -101,7 +105,7 @@ class RoomsManager:
             doc_uuid = doc_uuids[0]
             if not os.path.exists(
                     os.path.join(self.document_manager.get_document_folder(doc_uuid), doc_uuid + ".adoc")):
-                self.logger.error("User is in a room but document does not exists, disconnecting")
+                self.logger.error("User is in a room but document does not exists, exiting room for user")
                 emit("display_error", {"error": "This document doesn't seems to exist"})
                 self.remove_room_user(doc_uuid, client_id)
                 return
@@ -120,23 +124,32 @@ class RoomsManager:
         @functools.wraps(function)
         def decorator(*args, **kwargs):
             doc_uuid = self.document_manager.get_user_current_doc_uuid(rooms())
+
+
             if not doc_uuid:
                 # Shouldn't happen
                 self.logger.error("Check write permission but user not in any room, this should not happen")
                 return
+
+            u_uid = self.auth_manager.get_current_u_uid()
+            if not self.app_config.allow_anonymous_edit and u_uid == 0:
+                emit("display_error", {"error": "Anonymous edition is disabled"})
+                self.logger.error("Anonymous user trying to edit, refusing")
+                return
+
             client_id = session.get("client_id")
             if not client_id:
                 # Shouldn't happen
                 self.logger.error("Client ID null, unable to check write permission")
                 emit("display_error", {"error": "You are not allowed to write this document"})
                 return
-            r = self._get_room(doc_uuid)
-            if not r:
+            room = self._get_room(doc_uuid)
+            if not room:
                 # Shouldn't happen
                 self.logger.error("Can't get room for current user, unable to check write permission")
                 emit("display_error", {"error": "You are not allowed to write this document"})
                 return
-            user = r.get_user(client_id)
+            user = room.get_user(client_id)
             u_uuid = user.user_unique_identifier
             if not self.document_manager.can_user_write_document(doc_uuid, u_uuid):
                 emit("display_error", {"error": "You are not allowed to write this document"})

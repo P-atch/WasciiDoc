@@ -1,5 +1,5 @@
 <ng-template #newDocumentTemplate>
-    <button mat-fab extended (click)="newDocument()">
+    <button mat-fab extended [disabled]="canCreateDoc()" (click)="newDocument()">
       New
     </button>
     <span class="little-spacer"></span>
@@ -50,8 +50,8 @@
                         <mat-card-content>
                         </mat-card-content>
                         <mat-card-actions>
-                            <button mat-button (click)="deleteDocument(doc.doc_uuid, doc.doc_name)">Delete</button>
-                            <button mat-button (click)="renameDocument(doc.doc_uuid, doc.doc_name)">Rename</button>
+                            <button mat-button [disabled]="canEditDoc()" (click)="deleteDocument(doc.doc_uuid, doc.doc_name)">Delete</button>
+                            <button mat-button [disabled]="canEditDoc()" (click)="renameDocument(doc.doc_uuid, doc.doc_name)">Rename</button>
                         </mat-card-actions>
                     </mat-card>
 

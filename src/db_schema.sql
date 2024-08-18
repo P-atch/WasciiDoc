@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS documents(
     document_name VARCHAR(500) NOT NULL,
     user_uuid UNSIGNED BIGINT NOT NULL,
     restriction TINYINT NOT NULL,
+    temporary BOOLEAN DEFAULT(FALSE),
     UNIQUE(document_uuid),
     FOREIGN KEY (user_uuid) REFERENCES known_users(user_uuid)
 );
@@ -18,3 +19,5 @@ CREATE TABLE IF NOT EXISTS known_users(
 );
 --
 INSERT OR IGNORE INTO known_users(user_uuid, known_name) VALUES (0, 'Invited');
+--
+DELETE FROM documents WHERE temporary=TRUE;

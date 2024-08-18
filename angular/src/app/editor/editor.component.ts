@@ -127,6 +127,28 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
 
   initEditor() {
+    this.socket.once("init_document_editor", (data: any) => {
+      for(let required_key of ["document", "update_id", "content", "html", "client_id", "client_cursors"]) {
+        if(data[required_key] === undefined) {
+          console.error(`Missing required key ${required_key} in init_document_editor`);
+        }
+      }
+      this.loadingService.decreaseLoading();
+      this.clientId = data["client_id"];
+      console.log(`Received new client ID : ${this.clientId}`);
+      for(let client_cursor of data["client_cursors"]) {
+        this.updateRemoteCursorPosition(client_cursor["client_id"], client_cursor["cursor_position"]);
+      }
+      this.updatedContent = data["content"];
+      this.setMonacoCode(data["content"]);
+      this.updateId = data["update_id"];
+      this.documentService.documentInfos = data["document"];
+      this.updatedHtml = data["html"];
+      this.result_displayer.nativeElement.innerHTML = this.updatedHtml;
+      this.updateReadOnly()
+      this.loadedAssets.remote_content_init = true;
+    });
+
     this.loadingService.increaseLoading();
     this.socket.emit("init_document_editor");
     this.loadedAssets.component_init = true;
@@ -177,27 +199,6 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.toolbarService.addElement(this.downloadAsTemplate, 'right');
     this.toolbarService.addElement(this.otherUsersTemplateRef, 'right');
 
-    this.socket.once("init_document_editor", (data: any) => {
-      for(let required_key of ["document", "update_id", "content", "html", "client_id", "client_cursors"]) {
-        if(data[required_key] === undefined) {
-          console.error(`Missing required key ${required_key} in init_document_editor`);
-        }
-      }
-      this.loadingService.decreaseLoading();
-      this.clientId = data["client_id"];
-      console.log(`Received new client ID : ${this.clientId}`);
-      for(let client_cursor of data["client_cursors"]) {
-        this.updateRemoteCursorPosition(client_cursor["client_id"], client_cursor["cursor_position"]);
-      }
-      this.updatedContent = data["content"];
-      this.setMonacoCode(data["content"]);
-      this.updateId = data["update_id"];
-      this.documentService.documentInfos = data["document"];
-      this.updatedHtml = data["html"];
-      this.result_displayer.nativeElement.innerHTML = this.updatedHtml;
-      this.updateReadOnly()
-      this.loadedAssets.remote_content_init = true;
-    });
     /////// End of init events
 
     this.socket.on("update_document", (data: any) => {
