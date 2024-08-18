@@ -18,7 +18,7 @@ class DocumentManager:
         """
         Clean documents which are not in DB
         """
-        list_docs = self.db_manager.list_documents(user_uuid=-1)
+        list_docs = self.db_manager.get_all_documents(get_temporary=False)
         doc_uuids = [e.doc_uuid for e in list_docs]
         for doc_uuid in os.listdir(self.document_folder):
             if doc_uuid not in doc_uuids:

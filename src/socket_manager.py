@@ -62,8 +62,9 @@ class SocketManager (Namespace):
             #    emit("join_room", "KO")
             #    self.logger.error("Anonymous user trying to edit, refusing")
             #    return
+            print(doc_uuid)
 
-            if self.db_manager.get_document(doc_uuid, u_info.user_unique_identifier) is not None:
+            if self.db_manager.get_document(doc_uuid, u_uid) is not None:
                 emit("join_room", "OK")
 
                 self.logger.info(f"User '{u_info.username}' join room '{doc_uuid}'")

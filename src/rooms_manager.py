@@ -105,7 +105,7 @@ class RoomsManager:
             doc_uuid = doc_uuids[0]
             if not os.path.exists(
                     os.path.join(self.document_manager.get_document_folder(doc_uuid), doc_uuid + ".adoc")):
-                self.logger.error("User is in a room but document does not exists, disconnecting")
+                self.logger.error("User is in a room but document does not exists, exiting room for user")
                 emit("display_error", {"error": "This document doesn't seems to exist"})
                 self.remove_room_user(doc_uuid, client_id)
                 return

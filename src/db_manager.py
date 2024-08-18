@@ -23,6 +23,24 @@ class DbManager:
         db = sqlite3.connect(self.db_path)
         return db, db.cursor()
 
+    def get_all_documents(self, get_temporary=False):
+        db, cursor = self.open_db()
+        try:
+            if not get_temporary:
+                cursor.execute("SELECT document_uuid, document_name, documents.user_uuid, restriction, known_name FROM documents "
+                               "JOIN known_users ON known_users.user_uuid=documents.user_uuid "
+                               "WHERE temporary=FALSE")
+            else:
+                cursor.execute(
+                    "SELECT document_uuid, document_name, documents.user_uuid, restriction, known_name FROM documents")
+            res = cursor.fetchall()
+            ret = []
+            for e in res:
+                ret.append(DbDocument(e[0], e[1], e[2], e[3], e[4]))
+            return ret
+        finally:
+            db.close()
+
     def list_documents(self, user_uuid: int) -> [DbDocument]:
         db, cursor = self.open_db()
         self.logger.info(f"Listing documents for user {user_uuid}")
@@ -30,8 +48,6 @@ class DbManager:
             restriction_filter = DocumentRestriction.PRIVATE
             if user_uuid is None or user_uuid == 0:
                 restriction_filter = DocumentRestriction.PROTECTED
-            if user_uuid == -1: # Admin
-                restriction_filter = DocumentRestriction.PRIVATE
             cursor.execute(
                 "SELECT document_uuid, document_name, documents.user_uuid, restriction, known_name FROM documents "
                 "JOIN known_users ON known_users.user_uuid=documents.user_uuid "
@@ -48,7 +64,7 @@ class DbManager:
     def get_document(self, doc_uuid: str, user_uuid: int):
         db, cursor = self.open_db()
         try:
-            restriction_filter = DocumentRestriction.LOCKED
+            restriction_filter = DocumentRestriction.PROTECTED
             if user_uuid is None:
                 restriction_filter = DocumentRestriction.PROTECTED
             if user_uuid == -1:
