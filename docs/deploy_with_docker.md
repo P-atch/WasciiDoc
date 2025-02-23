@@ -43,7 +43,7 @@ This is an example of site config file with SSL enabled
 version: '3'
 services:
   app:
-    image: 860000/wasciidoc:main
+    image: 860000/wasciidoc:master
     environment:
       - ENABLE_GITHUB_OAUTH=true
       - GITHUB_CLIENT_ID=<github_client_id>
